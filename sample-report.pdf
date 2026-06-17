@@ -1,0 +1,246 @@
+%PDF-1.4
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+2 0 obj
+<</Type/Pages/Kids[6 0 R 8 0 R]/Count 2>>
+endobj
+3 0 obj
+<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>
+endobj
+4 0 obj
+<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold>>
+endobj
+5 0 obj
+<</Length 7695>>
+stream
+0.055 0.067 0.086 rg 0.0 786.0 595.0 56.0 re f
+0.930 0.190 0.140 rg 0.0 783.0 595.0 3.0 re f
+0.930 0.190 0.140 rg 45.00 825.00 m 67.00 825.00 l 67.00 811.80 l 56.00 798.88 l 45.00 811.80 l h f
+1.000 1.000 1.000 RG 2.20 w 1 J 1 j 50.72 814.55 m 55.12 809.60 l 62.16 819.50 l S
+BT /F2 17 Tf 1.000 1.000 1.000 rg 76.0 816.0 Td (FortiToolbox) Tj ET
+BT /F1 9 Tf 0.740 0.780 0.820 rg 76.0 800.0 Td (Diagnostic report) Tj ET
+BT /F1 9 Tf 0.740 0.780 0.820 rg 327.0 800.0 Td (FortiGate-100F  7.6) Tj ET
+0.850 0.870 0.900 rg 0.0 36.0 595.0 0.6 re f
+BT /F1 8 Tf 0.500 0.530 0.580 rg 48.0 24.0 Td (github.com/Metzcall/fortitoolbox) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 377.0 24.0 Td (MIT  -  generated 2026-06-17 13:48) Tj ET
+0.957 0.965 0.973 rg 48.0 691.0 499.0 81.0 re f
+BT /F2 8 Tf 0.500 0.530 0.580 rg 56.0 760.0 Td (DEVICE) Tj ET
+BT /F1 10 Tf 0.120 0.140 0.170 rg 56.0 748.0 Td (Model:    FortiGate-100F) Tj ET
+BT /F1 10 Tf 0.120 0.140 0.170 rg 56.0 734.0 Td (Version:  v7.6.2 build1234) Tj ET
+BT /F1 10 Tf 0.120 0.140 0.170 rg 56.0 720.0 Td (Serial:   FG10**********65) Tj ET
+BT /F1 10 Tf 0.120 0.140 0.170 rg 56.0 706.0 Td (Hostname: FW-EDGE-MAD-01) Tj ET
+BT /F1 10 Tf 0.120 0.140 0.170 rg 56.0 692.0 Td (VDOM:     root) Tj ET
+BT /F2 16 Tf 0.973 0.318 0.286 rg 48.0 670.0 Td (NEEDS ATTENTION) Tj ET
+0.973 0.318 0.286 rg 48.0 638.0 33.3 14.0 re f
+0.824 0.600 0.133 rg 81.3 638.0 266.1 14.0 re f
+0.247 0.725 0.314 rg 347.4 638.0 149.7 14.0 re f
+0.345 0.651 1.000 rg 497.1 638.0 49.9 14.0 re f
+0.973 0.318 0.286 rg 48.0 628.0 41.6 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 630.0 Td (FAIL 2) Tj ET
+0.824 0.600 0.133 rg 94.6 628.0 47.2 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 98.6 630.0 Td (WARN 16) Tj ET
+0.247 0.725 0.314 rg 146.8 628.0 41.6 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 150.8 630.0 Td (PASS 9) Tj ET
+0.345 0.651 1.000 rg 193.4 628.0 41.6 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 197.4 630.0 Td (INFO 3) Tj ET
+0.930 0.190 0.140 RG 2.50 w 48.0 617.0 m 48.0 604.0 l S
+BT /F2 12 Tf 0.055 0.067 0.086 rg 56.0 606.0 Td (System & Health) Tj ET
+0.247 0.725 0.314 rg 48.0 588.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 590.0 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 590.0 Td (Version & hardware model) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 576.0 Td (FortiGate-100F 7.6) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 563.5 Td (Model: FortiGate-100F   Version: v7.6.2 build1234   Serial: FG100FTK20098765   Hostname: FW-EDGE-MAD-01) Tj ET
+0.247 0.725 0.314 rg 48.0 549.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 551.5 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 551.5 Td (Resources & conserve mode) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 537.5 Td (Memory 80%, conserve off) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 525.0 Td (Memory used: 80%   CPU: 12% busy   Conserve mode: off) Tj ET
+0.973 0.318 0.286 rg 48.0 511.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 513.0 Td (FAIL) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 513.0 Td (FortiGuard connectivity & per-module licensing) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 499.0 Td (Attention: IPS Attack Engine, Web Filtering) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 486.5 Td (AV Engine: 264d   Virus Definitions: 264d   IPS Attack Engine: 11d   Web Filtering: EXPIRED   FDS: available) Tj ET
+0.973 0.318 0.286 rg 48.0 472.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 474.5 Td (FAIL) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 474.5 Td (HA sync & checksum) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 460.5 Td (HA OUT-OF-SYNC: FG100FTK20012340 \(checksum mismatch\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 448.0 Td (Members out-of-sync: 1   HA events logged: 3   Last role change: 2026-06-05) Tj ET
+0.824 0.600 0.133 rg 48.0 434.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 436.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 436.0 Td (Time synchronization \(NTP\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 422.0 Td (NTP NOT synchronized - breaks certs/SAML/HA/log correlation) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 409.5 Td (Synchronized: no) Tj ET
+0.824 0.600 0.133 rg 48.0 395.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 397.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 397.5 Td (Crash log review) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 383.5 Td (2 crash entries, newest 28d ago) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 371.0 Td (Crash entries: 2   Most recent: 2026-05-12   Age: 28d) Tj ET
+0.247 0.725 0.314 rg 48.0 357.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 359.0 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 359.0 Td (Config error log) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 345.0 Td (No config errors logged) Tj ET
+0.824 0.600 0.133 rg 48.0 330.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 332.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 332.5 Td (Certificate expiry & CA chain \(per-VDOM\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 318.5 Td (SSL-Inspection-CA in 11d; vpn-portal-gw in 29d) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 306.0 Td (Fortinet_Factory \(device\): 8241d   SSL-Inspection-CA \(SSL-inspection\): 11d   vpn-portal-gw \(remote-gateway\): 29d) Tj ET
+0.247 0.725 0.314 rg 48.0 292.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 294.0 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 294.0 Td (Hardware / factory certificate) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 280.0 Td (Hardware/factory certificate OK \(all checks passed\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 267.5 Td (Valid to: 2049-01-01   Days left: 8241) Tj ET
+0.247 0.725 0.314 rg 48.0 253.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 255.5 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 255.5 Td (Conserve mode \(kernel + shared-memory\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 241.5 Td (Conserve off \(kernel + shared-memory\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 229.0 Td (Memory used: 80%   Kernel conserve: off   SHM conserve: off) Tj ET
+0.247 0.725 0.314 rg 48.0 215.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 217.0 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 217.0 Td (Hardware sensors \(temp / fan / PSU\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 203.0 Td (4 sensors, all within range) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 190.5 Td (Sensors: 4) Tj ET
+0.247 0.725 0.314 rg 48.0 176.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 178.5 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 178.5 Td (FortiAnalyzer log shipping) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 164.5 Td (FortiAnalyzer logging UP) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 152.0 Td (Connection: UP   Registration: registered) Tj ET
+0.930 0.190 0.140 RG 2.50 w 48.0 147.0 m 48.0 134.0 l S
+BT /F2 12 Tf 0.055 0.067 0.086 rg 56.0 136.0 Td (Network) Tj ET
+0.824 0.600 0.133 rg 48.0 118.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 120.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 120.0 Td (Interface link status \(hardware NIC\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 106.0 Td (Addressed ports not up/1000full: port2 \(half-duplex\); port4 \(link down, unknown-duplex, ?Mbps\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 93.5 Td (Physical ports: 4   Addressed ports: 3   Ports with rx/tx errors: port2\(330\)) Tj ET
+0.345 0.651 1.000 rg 48.0 79.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 81.5 Td (INFO) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 81.5 Td (Routing sanity \(default route, blackhole, unresolved\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 67.5 Td (1 blackhole route\(s\) \(intentional?\)) Tj ET
+endstream
+endobj
+6 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R>>>>/Contents 5 0 R>>
+endobj
+7 0 obj
+<</Length 7570>>
+stream
+0.055 0.067 0.086 rg 0.0 786.0 595.0 56.0 re f
+0.930 0.190 0.140 rg 0.0 783.0 595.0 3.0 re f
+0.930 0.190 0.140 rg 45.00 825.00 m 67.00 825.00 l 67.00 811.80 l 56.00 798.88 l 45.00 811.80 l h f
+1.000 1.000 1.000 RG 2.20 w 1 J 1 j 50.72 814.55 m 55.12 809.60 l 62.16 819.50 l S
+BT /F2 17 Tf 1.000 1.000 1.000 rg 76.0 816.0 Td (FortiToolbox) Tj ET
+BT /F1 9 Tf 0.740 0.780 0.820 rg 76.0 800.0 Td (Diagnostic report) Tj ET
+BT /F1 9 Tf 0.740 0.780 0.820 rg 327.0 800.0 Td (FortiGate-100F  7.6) Tj ET
+0.850 0.870 0.900 rg 0.0 36.0 595.0 0.6 re f
+BT /F1 8 Tf 0.500 0.530 0.580 rg 48.0 24.0 Td (github.com/Metzcall/fortitoolbox) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 377.0 24.0 Td (MIT  -  generated 2026-06-17 13:48) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 762.0 Td (Routes: 5   Default route: yes   Blackhole routes: 1) Tj ET
+0.824 0.600 0.133 rg 48.0 748.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 750.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 750.0 Td (Dynamic routing adjacencies \(BGP / OSPF\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 736.0 Td (BGP 198.51.100.7 Active; OSPF 10.20.0.9 ExStart/DR) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 723.5 Td (Adjacency issues: 2) Tj ET
+0.247 0.725 0.314 rg 48.0 709.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 711.5 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 711.5 Td (Session table) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 697.5 Td (18422 sessions, 312/s setup) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 685.0 Td (Sessions: 18422   Setup rate: 312/s) Tj ET
+0.824 0.600 0.133 rg 48.0 671.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 673.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 673.0 Td (Interface error/drop counters \(netlink\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 659.0 Td (Errors/drops: port2 \(330 err, 44 drop\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 646.5 Td (Interfaces: 3) Tj ET
+0.824 0.600 0.133 rg 48.0 632.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 634.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 634.5 Td (ARP table \(gateway resolution\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 620.5 Td (Unresolved ARP \(L2 next-hop down?\): 10.20.0.9) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 608.0 Td (ARP entries: 3   Per interface: port1:1, port2:1, port4:1   Incomplete: 10.20.0.9) Tj ET
+0.345 0.651 1.000 rg 48.0 594.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 596.0 Td (INFO) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 596.0 Td (Policy routes / SD-WAN rules in kernel) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 582.0 Td (1 policy route\(s\)/SD-WAN rule\(s\) in kernel \(override routing table\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 569.5 Td (Policy routes: 1) Tj ET
+0.930 0.190 0.140 RG 2.50 w 48.0 564.5 m 48.0 551.5 l S
+BT /F2 12 Tf 0.055 0.067 0.086 rg 56.0 553.5 Td (SD-WAN) Tj ET
+0.824 0.600 0.133 rg 48.0 535.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 537.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 537.5 Td (SD-WAN health-check \(SLA per member\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 523.5 Td (1/2 SD-WAN members dead) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 511.0 Td (SLA members: 2   Dead: 1) Tj ET
+0.824 0.600 0.133 rg 48.0 497.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 499.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 499.0 Td (SD-WAN rules / service path selection) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 485.0 Td (Service\(s\) 2 have no selected member - traffic blackholed) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 472.5 Td (SD-WAN rules: 2   Rules with no path: 1) Tj ET
+0.824 0.600 0.133 rg 48.0 458.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 460.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 460.5 Td (SD-WAN member interfaces) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 446.5 Td (1 SD-WAN member\(s\) dead) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 434.0 Td (Members: 2   Dead: 1) Tj ET
+0.824 0.600 0.133 rg 48.0 420.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 422.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 422.0 Td (SD-WAN SLA transition log \(recent flaps\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 408.0 Td (1 SLA member went down recently \(flapping?\)) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 395.5 Td (Transitions logged: 3   -> dead: 1) Tj ET
+0.930 0.190 0.140 RG 2.50 w 48.0 390.5 m 48.0 377.5 l S
+BT /F2 12 Tf 0.055 0.067 0.086 rg 56.0 379.5 Td (VPN) Tj ET
+0.824 0.600 0.133 rg 48.0 361.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 363.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 363.5 Td (IPsec tunnels \(phase-2 selectors up/down\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 349.5 Td (Down/incomplete: HQ-to-Branch2) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 337.0 Td (IPsec tunnels: 3   Selectors down: 1) Tj ET
+0.824 0.600 0.133 rg 48.0 323.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 325.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 325.0 Td (IKE phase-1 gateways) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 311.0 Td (1 phase-1 gateway\(s\) not established) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 298.5 Td (IKE gateways: 2   Established: 1) Tj ET
+0.345 0.651 1.000 rg 48.0 284.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 286.5 Td (INFO) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 286.5 Td (SSL-VPN active sessions) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 272.5 Td (2 SSL-VPN user\(s\) connected) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 260.0 Td (Login users: 2) Tj ET
+0.824 0.600 0.133 rg 48.0 246.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 248.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 248.0 Td (IPsec tunnel traffic & errors \(per SA\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 234.0 Td (tx>0 but rx=0 \(asymmetry\): HQ-to-Branch2) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 221.5 Td (Tunnels \(SA\): 2) Tj ET
+0.930 0.190 0.140 RG 2.50 w 48.0 216.5 m 48.0 203.5 l S
+BT /F2 12 Tf 0.055 0.067 0.086 rg 56.0 205.5 Td (Security / Policy) Tj ET
+0.824 0.600 0.133 rg 48.0 187.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 189.5 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 189.5 Td (Dead policies \(hit-count 0\)) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 175.5 Td (2 dead policies \(idx 7, 12\) - candidates to remove/reorder) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 163.0 Td (Policies seen: 5   Dead \(hit-count 0\): 2) Tj ET
+0.824 0.600 0.133 rg 48.0 149.0 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 151.0 Td (WARN) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 151.0 Td (Web filter rating servers) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 137.0 Td (2 servers reachable, 2 packet\(s\) lost) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 124.5 Td (Service: Enable   Rating servers: 2   Best RTT: 12ms   Total lost: 2) Tj ET
+0.930 0.190 0.140 RG 2.50 w 48.0 119.5 m 48.0 106.5 l S
+BT /F2 12 Tf 0.055 0.067 0.086 rg 56.0 108.5 Td (DNS & Resolution) Tj ET
+0.247 0.725 0.314 rg 48.0 90.5 30.4 12.0 re f
+BT /F2 7 Tf 1.000 1.000 1.000 rg 52.0 92.5 Td (PASS) Tj ET
+BT /F2 10 Tf 0.120 0.140 0.170 rg 83.4 92.5 Td (DNS config, server readiness & resolution) Tj ET
+BT /F1 8 Tf 0.500 0.530 0.580 rg 52.0 78.5 Td (DNS resolves, 4/4 servers ready) Tj ET
+BT /F1 8 Tf 0.620 0.650 0.700 rg 52.0 66.0 Td (Primary: 96.45.45.45   Secondary: 96.45.46.46   DNS-over-TLS: disable   DNS servers ready: 4/4   Best RTT: 1ms   Servers with recent failures: 1   Resolution loss: 0%) Tj ET
+endstream
+endobj
+8 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R>>>>/Contents 7 0 R>>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000054 00000 n 
+0000000111 00000 n 
+0000000174 00000 n 
+0000000242 00000 n 
+0000007987 00000 n 
+0000008108 00000 n 
+0000015728 00000 n 
+trailer
+<</Size 9/Root 1 0 R>>
+startxref
+15849
+%%EOF

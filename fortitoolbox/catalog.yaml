@@ -1,0 +1,337 @@
+# FortiToolbox diagnostic catalog.
+# Adding a diagnostic = one entry here + one parser function. No core changes.
+#
+# Fields:
+#   id          unique key, also the parser name it binds to
+#   module      tab it appears under
+#   title       operator-facing name (what it controls/checks, not internals)
+#   cmds        list of CLI commands (read-grade). {fqdn}/{policyid} are filled by engine.
+#   privilege   read | sysdiag         (sysdiag => needs `system-diagnostics enable`)
+#   stateful    false => safe read; true => debug/enable, lives behind Advanced
+#   advanced    true  => hidden until the operator opens Advanced
+#   kits        which one-click presets include this check
+#   verify      true  => exact syntax to be confirmed against the target MR CLI ref
+#   versions    versions this entry is valid for
+versions_supported: ["7.4", "7.6", "8.0"]
+
+# Command used to enumerate VDOMs on a multi-VDOM device (run from global).
+# ASSUMED syntax/output -- CONFIRM against your MR before production.
+vdom_list_cmd: "diagnose sys vd list"
+
+checks:
+  # ---------------- System & Health ----------------
+  - id: version_model
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: Version & hardware model
+    cmds: ["get system status"]
+    privilege: read
+    kits: [quick, full]
+
+  - id: resources
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: Resources & conserve mode
+    cmds: ["get system performance status"]
+    privilege: read
+    kits: [quick, full]
+
+  - id: fortiguard
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: FortiGuard connectivity & per-module licensing
+    cmds: ["get system fortiguard", "diagnose autoupdate versions"]
+    privilege: sysdiag
+    kits: [quick, full]
+
+  - id: ha
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: HA sync & checksum
+    cmds: ["get system ha status", "diagnose sys ha checksum cluster", "diagnose sys ha history read"]
+    privilege: sysdiag
+    verify: true
+    kits: [quick, full]
+
+  - id: ntp
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: Time synchronization (NTP)
+    cmds: ["diagnose sys ntp status"]
+    privilege: sysdiag
+    verify: true
+    kits: [quick, full]
+
+  - id: crashlog
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: Crash log review
+    cmds: ["diagnose debug crashlog read"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: config_error_log
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: System & Health
+    title: Config error log
+    cmds: ["diagnose debug config-error-log read"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  # ---------------- Certificates ----------------
+  - id: certificates
+    scope: vdom
+    module: System & Health
+    title: Certificate expiry & CA chain (per-VDOM)
+    cmds: ["get vpn certificate local detail"]
+    privilege: read
+    verify: true
+    kits: [quick, full]
+
+  - id: hw_certificate
+    scope: global
+    module: System & Health
+    title: Hardware / factory certificate
+    cmds: ["diagnose hardware certificate"]
+    privilege: sysdiag
+    verify: true   # syntax per Héctor; output format ASSUMED -> validate
+    kits: [full]
+
+  # ---------------- Network ----------------
+  - id: interfaces
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: Network
+    title: Interface link status (hardware NIC)
+    cmds: ["get system interface physical"]
+    expand_nic: true   # + diagnose hardware deviceinfo nic <port> per physical port (needs diagnose)
+    privilege: read
+    verify: true
+    kits: [quick, full]
+
+  - id: routing
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: Network
+    title: Routing sanity (default route, blackhole, unresolved)
+    cmds: ["get router info routing-table all"]
+    privilege: read
+    kits: [quick, full]
+
+  - id: dynamic_routing
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: Network
+    title: Dynamic routing adjacencies (BGP / OSPF)
+    cmds: ["get router info bgp summary", "get router info ospf neighbor"]
+    privilege: read
+    verify: true
+    kits: [full]
+
+  # ---------------- SD-WAN ----------------
+  - id: sdwan_health
+    scope: vdom
+    module: SD-WAN
+    title: SD-WAN health-check (SLA per member)
+    cmds: ["diagnose sys sdwan health-check"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: sdwan_service
+    scope: vdom
+    module: SD-WAN
+    title: SD-WAN rules / service path selection
+    cmds: ["diagnose sys sdwan service4"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: sdwan_members
+    scope: vdom
+    module: SD-WAN
+    title: SD-WAN member interfaces
+    cmds: ["diagnose sys sdwan member"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: sdwan_sla_log
+    scope: vdom
+    module: SD-WAN
+    title: SD-WAN SLA transition log (recent flaps)
+    cmds: ["diagnose sys sdwan sla-log"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  # ---------------- VPN ----------------
+  - id: vpn_ipsec_summary
+    scope: vdom
+    module: VPN
+    title: IPsec tunnels (phase-2 selectors up/down)
+    cmds: ["get vpn ipsec tunnel summary"]
+    privilege: read
+    verify: true
+    kits: [quick, full]
+
+  - id: vpn_ike_gw
+    scope: vdom
+    module: VPN
+    title: IKE phase-1 gateways
+    cmds: ["diagnose vpn ike gateway list"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: vpn_ssl
+    scope: vdom
+    module: VPN
+    title: SSL-VPN active sessions
+    cmds: ["get vpn ssl monitor"]
+    privilege: read
+    verify: true
+    kits: [full]
+
+  - id: sessions
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: Network
+    title: Session table
+    cmds: ["diagnose sys session full-stat"]
+    privilege: sysdiag
+    kits: [full]
+
+  # ---------------- Security / Policy ----------------
+  - id: policy_hitcount
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: Security / Policy
+    title: Dead policies (hit-count 0)
+    cmds: ["diagnose firewall iprope show 100004 0"]
+    privilege: sysdiag
+    verify: true
+    note: "Cleanest source is the monitor API /api/v2/monitor/firewall/policy; SSH path shown here."
+    kits: [quick, full]
+
+  - id: webfilter_rating
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: Security / Policy
+    title: Web filter rating servers
+    cmds: ["diagnose debug rating"]
+    privilege: sysdiag
+    kits: [full]
+
+  # ---------------- DNS & Resolution ----------------
+  - id: dns
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: DNS & Resolution
+    title: DNS config, server readiness & resolution
+    cmds:
+      - {cmd: "get system dns", scope: global}
+      - {cmd: "diagnose test application dnsproxy 3", scope: global, optional: true}
+      - {cmd: "execute ping {fqdn}", scope: vdom}
+    privilege: read
+    verify: true
+    kits: [quick, full]
+
+  # ---------------- New (v0.1.9): root-cause coverage ----------------
+  - id: conserve
+    scope: global
+    module: System & Health
+    title: Conserve mode (kernel + shared-memory)
+    cmds: ["diagnose hardware sysinfo conserve", "diagnose hardware sysinfo shm"]
+    privilege: sysdiag
+    verify: true
+    kits: [quick, full]
+
+  - id: sensors
+    scope: global
+    module: System & Health
+    title: Hardware sensors (temp / fan / PSU)
+    cmds: ["execute sensor list"]
+    privilege: read
+    verify: true
+    note: "Physical appliances only; VMs report no sensors (INFO)."
+    kits: [full]
+
+  - id: faz_logging
+    scope: global
+    module: System & Health
+    title: FortiAnalyzer log shipping
+    cmds: ["execute log fortianalyzer test-connectivity"]
+    privilege: read
+    verify: true
+    kits: [full]
+
+  - id: interface_errors
+    module: Network
+    title: Interface error/drop counters (netlink)
+    cmds:
+      - {cmd: "diagnose netlink interface list", optional: true}
+    privilege: sysdiag
+    verify: true
+    note: "Command returns 9004 on Héctor's MR -- syntax to be confirmed; optional so it never errors."
+    kits: [full]
+
+  - id: arp
+    scope: vdom
+    module: Network
+    title: ARP table (gateway resolution)
+    cmds: ["get system arp"]
+    privilege: read
+    verify: true
+    kits: [full]
+
+  - id: policy_routes
+    scope: vdom
+    module: Network
+    title: Policy routes / SD-WAN rules in kernel
+    cmds: ["diagnose firewall proute list"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: vpn_ipsec_traffic
+    scope: vdom
+    module: VPN
+    title: IPsec tunnel traffic & errors (per SA)
+    cmds: ["diagnose vpn tunnel list"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  # ---------------- Advanced (stateful / interactive / write) ----------------
+  - id: debug_flow
+    scope: vdom   # global|vdom -- CONFIRM split with Héctor
+    module: Advanced
+    title: Packet flow trace (diagnose debug flow)
+    cmds: ["diagnose debug flow ..."]
+    privilege: sysdiag
+    stateful: true
+    advanced: true
+    verify: true
+
+  - id: sniffer
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: Advanced
+    title: Packet capture -> Wireshark (.pcap)
+    cmds: ["diagnose sniffer packet ..."]
+    privilege: sysdiag
+    stateful: true
+    advanced: true
+    verify: true
+
+  - id: auth_test
+    scope: global   # global|vdom -- CONFIRM split with Héctor
+    module: Advanced
+    title: Authentication test (LDAP / RADIUS / TACACS+)
+    cmds: ["diagnose test authserver ..."]
+    privilege: sysdiag
+    stateful: true
+    advanced: true
+    verify: true
+    note: "Requires operator-supplied credentials. SAML is not testable via CLI."
+
+# Built-in critical names probed for resolution (never customer data).
+critical_fqdns:
+  - update.fortiguard.net
+  - service.fortiguard.net
+  - www.fortinet.com

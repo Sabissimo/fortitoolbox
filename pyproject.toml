@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fortitoolbox"
+version = "0.4.4"
+description = "An operator's diagnostic toolbox for FortiGate (7.4 / 7.6 / 8.0)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary - internal use" }
+authors = [{ name = "Hector" }]
+dependencies = [
+    "nicegui>=2.0",
+    "netmiko>=4.2",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+fortitoolbox = "fortitoolbox.__main__:serve"
+
+[tool.setuptools]
+packages = ["fortitoolbox", "fortitoolbox.connectors"]
+
+[tool.setuptools.package-data]
+fortitoolbox = ["catalog.yaml"]
