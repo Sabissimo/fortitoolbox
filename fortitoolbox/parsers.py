@@ -845,7 +845,12 @@ def _vpn_ipsec_traffic(meta, out, dev):
 def _fsw_managed(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    rows = re.findall(r"^(S\d{3}\w{6,})\s+(v[\d.]+)\s+(\S+)", raw, re.MULTILINE)
+    # Real `get-conn-status` line: " <serial> v7.6.6 (1137) Authorized/Up <flag>
+    # <addr> <join-time> <serial>". Serials start with letters+digit (S248.../
+    # FS2F48TV...); the version carries a "(build)" suffix that we skip.
+    rows = re.findall(
+        r"^\s*([A-Z]{1,3}[0-9][A-Z0-9]{6,})\s+(v[\d.]+)\s*(?:\([^)]*\))?\s+(\S+)",
+        raw, re.MULTILINE)
     if not rows:
         r.status, r.headline = Status.INFO, "No managed FortiSwitches (FortiLink not in use)"
         return r
@@ -875,7 +880,7 @@ def _fsw_managed(meta, out, dev):
 def _fsw_sync(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    rows = re.findall(r"^(S\d{3}\w{6,})\s+(.+)$", raw, re.MULTILINE)
+    rows = re.findall(r"^\s*([A-Z]{1,3}[0-9][A-Z0-9]{6,})\s+(.+)$", raw, re.MULTILINE)
     if not rows:
         r.status, r.headline = Status.INFO, "No managed FortiSwitches to sync"
         return r
@@ -895,8 +900,8 @@ def _fsw_poe(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
     hot, total = [], 0
-    for b in re.split(r"(?=^FortiSwitch\s+S\d{3})", raw, flags=re.MULTILINE):
-        m = re.match(r"FortiSwitch\s+(S\d{3}\w+)", b)
+    for b in re.split(r"(?=^FortiSwitch\s+[A-Z]{1,3}[0-9])", raw, flags=re.MULTILINE):
+        m = re.match(r"FortiSwitch\s+([A-Z]{1,3}[0-9][A-Z0-9]+)", b)
         if not m:
             continue
         total += 1

@@ -335,27 +335,28 @@ name=HQ-to-Branch2 ver=2 serial=2 198.51.100.20:500->203.0.113.2:500
   bytes(tx/rx)=1203000/0 packets(tx/rx)=1203/0
   dec: pkts=0 errors=0 replay=0
 """,
-    # FortiSwitch (FortiLink-managed) -- seeded with one down + one off-target
-    # firmware switch so the FortiSwitch tab shows a real FAIL/WARN/PASS mix.
-    "execute switch-controller get-conn-status": """Managed-devices in current vdom root:
+    # FortiSwitch (FortiLink-managed) -- column layout matches real FortiOS 7.6
+    # `get-conn-status` (leading space, "v7.6.6 (build)" version, FLAG column).
+    # Seeded with one Authorized/Down switch so the tab shows a FAIL/WARN/PASS mix.
+    "execute switch-controller get-conn-status": """FortiLink interface : fortilink
+ SWITCH-ID         VERSION        STATUS           FLAG  ADDRESS       JOIN-TIME                  SERIAL
+ FS1E48T419000001  v7.6.6 (1137)  Authorized/Up    2     10.255.1.2    Wed Jun 17 14:12:51 2026   FS1E48T419000001
+ FS1E48T419000002  v7.6.6 (1137)  Authorized/Up    2     10.255.1.3    Wed Jun 17 14:13:47 2026   FS1E48T419000002
+ FS1E24T420000003  v7.6.6 (1137)  Authorized/Down  -     10.255.1.4    N/A                        FS1E24T420000003
 
-SWITCH-ID          VERSION    STATUS           ADDRESS           JOIN-TIME                 NAME
-S248EPTF20001234   v7.6.1     Authorized/Up    169.254.1.2       Mon Jun  8 21:43:11 2026  access-sw-1
-S124EPTF20005678   v7.6.1     Authorized/Up    169.254.1.3       Mon Jun  8 21:43:50 2026  access-sw-2
-S108ENTF21003333   v7.4.4     Authorized/Down  169.254.1.4       N/A                       idf-sw-3
-
-Managed-Switches: 3  (UP: 2, DOWN: 1)
+ Flags: C=config sync, U=upgrading, S=staged, D=delayed reboot pending, E=config sync error, 2=L2, 3=L3, V=VXLAN, T=tunnel, X=External
+ Managed-Switches: 3 (UP: 2 DOWN: 1 MAX: 96)
 """,
-    "execute switch-controller get-sync-status all": """Switch-ID          Sync-Status
-S248EPTF20001234   in-sync
-S124EPTF20005678   in-sync
-S108ENTF21003333   sync-error (config download failed)
+    "execute switch-controller get-sync-status all": """Switch-ID           Sync-Status
+ FS1E48T419000001    in-sync
+ FS1E48T419000002    in-sync
+ FS1E24T420000003    sync-error (config download failed)
 """,
-    "diagnose switch-controller switch-info poe": """FortiSwitch S248EPTF20001234 (access-sw-1):
+    "diagnose switch-controller switch-info poe": """FortiSwitch FS1E48T419000001 (access-sw-1):
   Max power budget : 370.0 W
   Power consumption: 142.6 W (39%)
   Powered ports    : 9
-FortiSwitch S124EPTF20005678 (access-sw-2):
+FortiSwitch FS1E48T419000002 (access-sw-2):
   Max power budget : 130.0 W
   Power consumption: 121.4 W (93%)
   Powered ports    : 6
