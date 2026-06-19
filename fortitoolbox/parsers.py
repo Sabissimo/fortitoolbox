@@ -836,6 +836,170 @@ def _vpn_ipsec_traffic(meta, out, dev):
 
 
 
+# --------------------------------------------------------------------------
+# FortiSwitch (FortiLink-managed) + FortiAP (wireless-controller managed).
+# All queried from the FortiGate; targets FortiSwitch 7.6.x and FortiAP 7.x.x.
+# Output regexes calibrated to docs.fortinet.com + community KB samples --
+# VALIDATE against real device output before production.
+@parser("fsw_managed")
+def _fsw_managed(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    rows = re.findall(r"^(S\d{3}\w{6,})\s+(v[\d.]+)\s+(\S+)", raw, re.MULTILINE)
+    if not rows:
+        r.status, r.headline = Status.INFO, "No managed FortiSwitches (FortiLink not in use)"
+        return r
+    down, off_ver = [], []
+    for sid, ver, status in rows:
+        st = status.lower()
+        if not ("up" in st and "auth" in st):
+            down.append(sid + " (" + status + ")")
+        elif not ver.startswith("v7.6"):            # target is 7.6.x
+            off_ver.append(sid + " " + ver)
+    r.m("Managed switches", len(rows))
+    r.m("Up", len(rows) - len(down))
+    if down:
+        r.m("Down/unauthorized", len(down))
+        r.status, r.headline = Status.FAIL, "FortiSwitch down/unauthorized: " + "; ".join(down[:4])
+    elif off_ver:
+        r.m("Off-target firmware", ", ".join(off_ver[:4]))
+        r.status, r.headline = Status.WARN, (
+            str(len(off_ver)) + " FortiSwitch(es) not on 7.6.x: " + "; ".join(off_ver[:3]))
+    else:
+        r.status, r.headline = Status.PASS, (
+            str(len(rows)) + " FortiSwitch(es) authorized & up on 7.6.x")
+    return r
+
+
+@parser("fsw_sync")
+def _fsw_sync(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    rows = re.findall(r"^(S\d{3}\w{6,})\s+(.+)$", raw, re.MULTILINE)
+    if not rows:
+        r.status, r.headline = Status.INFO, "No managed FortiSwitches to sync"
+        return r
+    bad = [s for s, st in rows if "in-sync" not in st.lower()]
+    r.m("Switches", len(rows))
+    r.m("In-sync", len(rows) - len(bad))
+    if bad:
+        r.status, r.headline = Status.FAIL, (
+            str(len(bad)) + " FortiSwitch config(s) out-of-sync: " + ", ".join(bad[:4]))
+    else:
+        r.status, r.headline = Status.PASS, "All " + str(len(rows)) + " FortiSwitch config(s) in-sync"
+    return r
+
+
+@parser("fsw_poe")
+def _fsw_poe(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    hot, total = [], 0
+    for b in re.split(r"(?=^FortiSwitch\s+S\d{3})", raw, flags=re.MULTILINE):
+        m = re.match(r"FortiSwitch\s+(S\d{3}\w+)", b)
+        if not m:
+            continue
+        total += 1
+        pct = re.search(r"consumption:.*?\((\d+)%\)", b)
+        if pct and int(pct.group(1)) >= 90:
+            hot.append(m.group(1) + " " + pct.group(1) + "%")
+    if total == 0:
+        r.status, r.headline = Status.INFO, "No PoE-capable managed FortiSwitches"
+        return r
+    r.m("PoE switches", total)
+    if hot:
+        r.m("Near budget", ", ".join(hot))
+        r.status, r.headline = Status.WARN, "PoE budget near limit: " + ", ".join(hot[:4])
+    else:
+        r.status, r.headline = Status.PASS, str(total) + " FortiSwitch PoE budget(s) healthy"
+    return r
+
+
+@parser("fap_managed")
+def _fap_managed(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    blocks = [b for b in re.split(r"(?=^WTP ID:)", raw, flags=re.MULTILINE) if "serial-id" in b]
+    if not blocks:
+        r.status, r.headline = Status.INFO, "No managed FortiAPs (wireless controller not in use)"
+        return r
+    down, off_ver = [], []
+    for b in blocks:
+        sid = re.search(r"serial-id\s*:\s*(\S+)", b)
+        name = re.search(r"name\s*:\s*(\S+)", b)
+        state = re.search(r"state\s*:\s*([^\n]+)", b)
+        ver = re.search(r"os-version\s*:\s*\S*?v(\d+\.\d+)", b)
+        label = (name.group(1) if name else (sid.group(1) if sid else "?"))
+        st = (state.group(1) if state else "").lower()
+        if not ("run" in st or "connected" in st):
+            down.append(label + " (" + (state.group(1).strip() if state else "?") + ")")
+        elif ver and not ver.group(1).startswith("7."):   # target is 7.x.x
+            off_ver.append(label + " v" + ver.group(1))
+    r.m("Managed APs", len(blocks))
+    r.m("Connected", len(blocks) - len(down))
+    if down:
+        r.m("Not connected", len(down))
+        r.status, r.headline = Status.WARN, "FortiAP not fully connected: " + "; ".join(down[:4])
+    elif off_ver:
+        r.m("Off-target firmware", ", ".join(off_ver[:4]))
+        r.status, r.headline = Status.WARN, (
+            str(len(off_ver)) + " FortiAP(s) not on 7.x: " + "; ".join(off_ver[:3]))
+    else:
+        r.status, r.headline = Status.PASS, str(len(blocks)) + " FortiAP(s) connected (CWAS_RUN) on 7.x"
+    return r
+
+
+@parser("fap_clients")
+def _fap_clients(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    rows = re.findall(
+        r"^\s*(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F:]{17})\s+(\S+)\s+\S+\s+(-?\d+)",
+        raw, re.MULTILINE)
+    total = re.search(r"Total STA:\s*(\d+)", raw)
+    if not rows and not total:
+        r.status, r.headline = Status.INFO, "No wireless clients / no managed APs"
+        return r
+    weak = [m for m in rows if int(m[3]) <= -75]
+    per_ap = {}
+    for _, _, ap, _rssi in rows:
+        per_ap[ap] = per_ap.get(ap, 0) + 1
+    count = int(total.group(1)) if total else len(rows)
+    r.m("Clients", count)
+    r.m("APs serving", len(per_ap))
+    if weak:
+        r.m("Weak signal (<=-75dBm)", len(weak))
+        r.status, r.headline = Status.WARN, str(len(weak)) + " client(s) at weak signal (<=-75 dBm)"
+    else:
+        r.status, r.headline = Status.PASS, str(count) + " wireless client(s), all healthy signal"
+    return r
+
+
+@parser("fap_health")
+def _fap_health(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    utils, issues = [], []
+    for m in re.finditer(
+            r"channel\s+(\d+).*?noise\s+(-?\d+)dBm\s+chan-util\s+(\d+)%", raw):
+        ch, noise, util = m.group(1), int(m.group(2)), int(m.group(3))
+        utils.append(util)
+        if util >= 80:
+            issues.append("ch" + ch + " " + str(util) + "% util")
+        elif noise > -80:
+            issues.append("ch" + ch + " noise " + str(noise) + "dBm")
+    if not utils:
+        r.status, r.headline = Status.INFO, "No FortiAP radio data"
+        return r
+    r.m("Radios", len(utils))
+    r.m("Busiest channel util", str(max(utils)) + "%")
+    if issues:
+        r.status, r.headline = Status.WARN, "Radio contention: " + "; ".join(issues[:4])
+    else:
+        r.status, r.headline = Status.PASS, str(len(utils)) + " radio(s), all uncongested"
+    return r
+
+
 def _parse_date(s: str):
     s = s.strip()
     for fmt in ("%Y-%m-%d", "%a %Y-%m-%d", "%Y-%m-%d %H:%M:%S"):

@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 FortiToolbox is a read-only diagnostic dashboard for FortiGate firewalls (FortiOS 7.4 / 7.6 / 8.0). It SSHes into a device (or a built-in mock), runs a curated set of `get`/`diagnose` commands, and renders each as a PASS/WARN/FAIL **verdict plus the one metric that matters** — conclusions, not raw dumps. Pure Python, NiceGUI UI, runs locally in the browser on `127.0.0.1:8080`.
 
+It also covers **FortiLink-managed FortiSwitches (7.6.x)** and **wireless-controller-managed FortiAPs (7.x.x)** — queried *from the FortiGate* via `switch-controller` / `wireless-controller` commands, so there is no separate transport and the tool stays fully offline. These appear as their own `FortiSwitch` and `FortiAP` tabs.
+
 ## Commands
 
 ```bash

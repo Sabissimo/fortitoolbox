@@ -298,6 +298,75 @@ checks:
     verify: true
     kits: [full]
 
+  # ---------------- FortiSwitch (FortiLink-managed) ----------------
+  # Managed switches are queried FROM the FortiGate via the switch-controller --
+  # no separate transport, stays fully offline. Targets FortiSwitch units running
+  # 7.6.x. Command set confirmed against docs.fortinet.com (execute/diagnose
+  # switch-controller) + community KB 281494; output formats calibrated to the
+  # documented samples -- VALIDATE against your MR before trusting in production.
+  - id: fsw_managed
+    scope: vdom
+    module: FortiSwitch
+    title: Managed FortiSwitch inventory & link status
+    cmds: ["execute switch-controller get-conn-status"]
+    privilege: read
+    verify: true
+    note: "FortiLink-managed switches; INFO if none are managed by this device/VDOM."
+    kits: [quick, full]
+
+  - id: fsw_sync
+    scope: vdom
+    module: FortiSwitch
+    title: FortiSwitch config sync status
+    cmds: ["execute switch-controller get-sync-status all"]
+    privilege: read
+    verify: true
+    kits: [full]
+
+  - id: fsw_poe
+    scope: vdom
+    module: FortiSwitch
+    title: FortiSwitch PoE power budget
+    cmds:
+      - {cmd: "diagnose switch-controller switch-info poe", optional: true}
+    privilege: sysdiag
+    verify: true
+    note: "Live per-switch PoE draw vs budget; optional (no-arg form/availability varies by MR)."
+    kits: [full]
+
+  # ---------------- FortiAP (wireless-controller managed) ----------------
+  # Managed APs are queried FROM the FortiGate wireless controller (diagnose
+  # wireless-controller wlac) -- stays fully offline. Targets FortiAP units
+  # running 7.x.x. Command set confirmed against docs.fortinet.com (wireless
+  # info) + community KB 197077; output is representative -- VALIDATE against MR.
+  - id: fap_managed
+    scope: vdom
+    module: FortiAP
+    title: Managed FortiAP inventory & connection state
+    cmds: ["diagnose wireless-controller wlac -c wtp"]
+    privilege: sysdiag
+    verify: true
+    note: "Managed FortiAPs and their CAPWAP state; INFO if none are managed."
+    kits: [quick, full]
+
+  - id: fap_clients
+    scope: vdom
+    module: FortiAP
+    title: Connected wireless clients (stations)
+    cmds: ["diagnose wireless-controller wlac -c sta"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
+  - id: fap_health
+    scope: vdom
+    module: FortiAP
+    title: FortiAP radio channel utilization & noise
+    cmds: ["diagnose wireless-controller wlac -d wtp"]
+    privilege: sysdiag
+    verify: true
+    kits: [full]
+
   # ---------------- Advanced (stateful / interactive / write) ----------------
   - id: debug_flow
     scope: vdom   # global|vdom -- CONFIRM split with Héctor

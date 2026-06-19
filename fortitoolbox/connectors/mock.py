@@ -335,6 +335,77 @@ name=HQ-to-Branch2 ver=2 serial=2 198.51.100.20:500->203.0.113.2:500
   bytes(tx/rx)=1203000/0 packets(tx/rx)=1203/0
   dec: pkts=0 errors=0 replay=0
 """,
+    # FortiSwitch (FortiLink-managed) -- seeded with one down + one off-target
+    # firmware switch so the FortiSwitch tab shows a real FAIL/WARN/PASS mix.
+    "execute switch-controller get-conn-status": """Managed-devices in current vdom root:
+
+SWITCH-ID          VERSION    STATUS           ADDRESS           JOIN-TIME                 NAME
+S248EPTF20001234   v7.6.1     Authorized/Up    169.254.1.2       Mon Jun  8 21:43:11 2026  access-sw-1
+S124EPTF20005678   v7.6.1     Authorized/Up    169.254.1.3       Mon Jun  8 21:43:50 2026  access-sw-2
+S108ENTF21003333   v7.4.4     Authorized/Down  169.254.1.4       N/A                       idf-sw-3
+
+Managed-Switches: 3  (UP: 2, DOWN: 1)
+""",
+    "execute switch-controller get-sync-status all": """Switch-ID          Sync-Status
+S248EPTF20001234   in-sync
+S124EPTF20005678   in-sync
+S108ENTF21003333   sync-error (config download failed)
+""",
+    "diagnose switch-controller switch-info poe": """FortiSwitch S248EPTF20001234 (access-sw-1):
+  Max power budget : 370.0 W
+  Power consumption: 142.6 W (39%)
+  Powered ports    : 9
+FortiSwitch S124EPTF20005678 (access-sw-2):
+  Max power budget : 130.0 W
+  Power consumption: 121.4 W (93%)
+  Powered ports    : 6
+""",
+    # FortiAP (wireless-controller managed) -- seeded with one AP still joining
+    # and one congested 5GHz radio so the FortiAP tab shows a WARN/PASS mix.
+    "diagnose wireless-controller wlac -c wtp": """WTP CFG list:
+
+WTP ID: FP231F-office-ap-1
+    serial-id  : FP231FTF22001111
+    name       : office-ap-1
+    os-version : FP231F-v7.4-build0476
+    state      : Connected (CWAS_RUN)
+    ip-addr    : 10.50.0.21
+    sta-count  : 18
+    uptime     : 12d04h11m
+WTP ID: FP231F-office-ap-2
+    serial-id  : FP231FTF22002222
+    name       : office-ap-2
+    os-version : FP231F-v7.4-build0476
+    state      : Connected (CWAS_RUN)
+    ip-addr    : 10.50.0.22
+    sta-count  : 7
+    uptime     : 12d04h09m
+WTP ID: FP221E-warehouse-ap-3
+    serial-id  : FP221ETF21003333
+    name       : warehouse-ap-3
+    os-version : FP221E-v7.2-build0301
+    state      : Discovered (CWAS_JOIN)
+    ip-addr    : 10.50.0.23
+    sta-count  : 0
+    uptime     : 0
+
+Total WTP: 3
+""",
+    "diagnose wireless-controller wlac -c sta": """sta_ip          sta_mac            ap_serial          vap          rssi  idle
+10.50.10.31     a4:83:e7:11:22:01  FP231FTF22001111   corp-wifi    -48    2
+10.50.10.32     a4:83:e7:11:22:02  FP231FTF22001111   corp-wifi    -55    0
+10.50.10.33     a4:83:e7:11:22:03  FP231FTF22001111   corp-wifi    -61    4
+10.50.10.78     a4:83:e7:11:22:7f  FP231FTF22002222   guest-wifi   -79   15
+10.50.10.79     a4:83:e7:11:22:80  FP231FTF22002222   guest-wifi   -67    1
+Total STA: 5
+""",
+    "diagnose wireless-controller wlac -d wtp": """WTP FP231FTF22001111 (office-ap-1):
+  Radio 1 802.11n/ax 2.4GHz : channel 6   txpower 17dBm  noise -94dBm  chan-util 34%  clients 11
+  Radio 2 802.11ac/ax 5GHz  : channel 36  txpower 20dBm  noise -96dBm  chan-util 52%  clients 7
+WTP FP231FTF22002222 (office-ap-2):
+  Radio 1 802.11n/ax 2.4GHz : channel 1   txpower 17dBm  noise -91dBm  chan-util 22%  clients 4
+  Radio 2 802.11ac/ax 5GHz  : channel 149 txpower 23dBm  noise -72dBm  chan-util 91%  clients 3
+""",
     "get user ldap": """== [ corp-ldap ]
 name        : corp-ldap
 server      : 10.20.0.10
