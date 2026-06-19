@@ -16,7 +16,9 @@ Pensada para el operador. Cada sección, lo justo.
 - **Quick health** (kit rápido) · **Full sweep** (todo) · **Run all in <pestaña>** ·
   o el botón **▶** de cada check.
 - Contadores arriba (FAIL/WARN/PASS/INFO): **clic = filtrar** las cards a ese estado
-  en todas las pestañas; "show all" limpia.
+  en todas las pestañas; mientras el filtro está activo, un **punto del color del
+  estado** marca las pestañas que contienen checks de ese tipo, para ver dónde están
+  sin abrirlas una a una; "show all" limpia.
 - Cada card: lámpara de estado, headline (la conclusión), métricas (el número que
   importa) y "Raw output" plegable.
 
