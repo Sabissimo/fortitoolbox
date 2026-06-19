@@ -43,6 +43,10 @@ HEAD = f"""
   .ftb-totop {{ position:fixed; bottom:22px; right:22px; z-index:2000; opacity:0;
                transition:opacity .2s; pointer-events:none; }}
   .ftb-totop.show {{ opacity:1; pointer-events:auto; }}
+  /* status-filter dot: inline, right after the tab label with a small gap so it
+     never overlaps the text; coloured per status with a soft glow like the lamps */
+  .ftb-tabdot {{ display:none; width:8px; height:8px; border-radius:50%;
+                 flex:0 0 auto; box-shadow:0 0 6px currentColor; }}
 </style>
 <script>
   window.addEventListener('scroll', function() {{
@@ -143,25 +147,19 @@ def _set_filter(st):
     _update_tab_alerts()
 
 
-# Quasar palette names for the per-tab alert dot shown while a filter is active.
-_STATUS_QCOLOR = {Status.FAIL: "red", Status.WARN: "amber",
-                  Status.PASS: "green", Status.INFO: "blue", Status.SKIPPED: "grey"}
-
-
 def _update_tab_alerts():
-    """While a status filter is active, mark each module tab that contains a
-    matching check with a coloured alert dot, so the operator can see *where*
-    the filtered checks live without opening every tab. Cleared when no filter."""
+    """While a status filter is active, light an inline dot (in the status colour)
+    on each module tab that contains a matching check, so the operator can see
+    *where* the filtered checks live without opening every tab. Off when no filter."""
     st = S.filter_status
-    color = _STATUS_QCOLOR.get(st, "red")
-    for m, tab in getattr(S, "tab_els", {}).items():
+    color = LAMP.get(st, LAMP_DEFAULT)
+    for m, dot in getattr(S, "tab_dots", {}).items():
         n = 0
         if st is not None:
             n = sum(1 for c in _checks_in(m)
                     if S.results.get(c["id"]) and S.results[c["id"]].status == st)
-        tab.props(remove="alert")
-        if n:
-            tab.props(add=f"alert={color}")
+        dot.style(f"display:{'inline-block' if n else 'none'};"
+                  f"background:{color};color:{color}")
 
 
 def _toggle_sysdiag():
@@ -1159,12 +1157,16 @@ def build():
         modules = [c["module"] for c in S.catalog["checks"]]
         modules = list(dict.fromkeys(modules))
         tab_names = modules + ["Reference"]
-        S.tab_els = {}
+        S.tab_dots = {}
         with ui.tabs().classes("w-full").props("dense") as tabs:
             for m in tab_names:
-                t = ui.tab(m)
                 if m in modules:
-                    S.tab_els[m] = t
+                    with ui.tab(m, label=""):
+                        with ui.row().classes("items-center no-wrap").style("gap:7px;margin:0"):
+                            ui.label(m)
+                            S.tab_dots[m] = ui.element("span").classes("ftb-tabdot")
+                else:
+                    ui.tab(m)
         with ui.tab_panels(tabs, value=modules[0]).classes("w-full").style("background:transparent"):
             for m in tab_names:
                 with ui.tab_panel(m).classes("gap-3"):
