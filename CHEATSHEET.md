@@ -63,6 +63,23 @@ Enumerar VDOMs: `diagnose sys vd list` (desde global).
 | Readiness servidores | `diagnose test application dnsproxy 3` | **global** (saca el detalle por-VDOM dentro) |
 | Resolución | `execute ping update.fortiguard.net` | vdom |
 
+## FortiSwitch (FortiLink) `vdom`
+Consultados **desde el FortiGate** vía `switch-controller` (sin transporte aparte).
+| Check | Comando | Detecta |
+|---|---|---|
+| Inventario & link | `execute switch-controller get-conn-status` | switches autorizados/up; firmware fuera del objetivo (`target_fw`, def. 7.6.x) |
+| Sync de config | `execute switch-controller get-sync-status all` | config sin sincronizar |
+| PoE `[diag]` | `diagnose switch-controller switch-info poe summary` | consumo vs presupuesto + puertos en fallo (overload/short/denied) |
+
+## FortiAP (wireless-controller) `vdom` `[diag]`
+Consultados **desde el FortiGate** vía `wireless-controller` (sin transporte aparte).
+| Check | Comando | Detecta |
+|---|---|---|
+| Inventario & CAPWAP | `diagnose wireless-controller wlac -c wtp` | APs gestionados + estado de conexión |
+| Clientes (stations) | `diagnose wireless-controller wlac -c sta` | estado de auth (sin RSSI; eso va en `-d sta`) |
+| Túnel CAPWAP | `diagnose wireless-controller wlac -d wtp` | túnel control/datos activo (endpoint ≠ 0.0.0.0) |
+| Radio / ruido / firmware | `diagnose wireless-controller wlac -c wtp` | utilización de canal (pico), noise floor, firmware, uptime (mismo dump que Inventario) |
+
 ## Interactivas (Advanced)
 
 **Debug Flow** (per-VDOM, acotado, con limpieza garantizada):

@@ -86,3 +86,8 @@ Verified in Demo via the mock: `fap_radio` WARN (busy radio) / PASS on real `GC-
 
 ### Open question before `fsw_port_errors` (#1, deferred)
 - Confirm the single-shot vs per-switch form of `port-stats` on the target MR + capture real output; decide whether to add an `expand_switch` engine step or use an all-switches command.
+
+## 6. Unrelated UI work done in the same session (not part of this plan)
+
+- **Per-tab status dot while filtering** (`app.py`). Clicking a FAIL/WARN/… tally chip now lights an inline coloured dot (status lamp colour, after the tab label, no overlap) on every module tab that contains a matching check — so you can see *where* the filtered checks live without opening each tab. `_update_tab_alerts()` toggles dots stored in `S.tab_dots`; called from `_set_filter` and `_refresh_all`. Verified live (Demo → Full sweep → WARN/FAIL). Commits `a011a00` (initial, Quasar alert prop) → `a10ed71` (refined to inline dot, no text overlap). Documented in `GUIDE.md`.
+- **Docs/repo housekeeping**: README/CONTRIBUTING/PDF-footer URL `Metzcall` → `Sabissimo`; README install fixed (`pip install -e .` instead of the frozen wheel) + Updating section; CHEATSHEET gained FortiSwitch/FortiAP sections.
