@@ -69,15 +69,15 @@ REFERENCE = {
                     "PASS all Authorized/Up on 7.6.x; WARN off-target firmware; FAIL any down/unauthorized; INFO none managed."),
     "fsw_sync": ("FortiSwitch configuration sync status.",
                  "PASS all in-sync; FAIL any sync error; INFO none managed."),
-    "fsw_poe": ("Per-switch live PoE draw vs power budget.",
+    "fsw_poe": ("Per-switch live PoE draw vs power budget (from `poe summary`).",
                 "PASS within budget; WARN any switch >=90% of budget; INFO no PoE switches."),
     # FortiAP (wireless-controller managed, queried from the FortiGate)
-    "fap_managed": ("Managed FortiAP inventory, firmware and CAPWAP connection state.",
-                    "PASS all connected (CWAS_RUN) on 7.x; WARN any not connected / off-target; INFO none managed."),
-    "fap_clients": ("Connected wireless clients (stations) and signal quality.",
-                    "PASS clients with healthy signal; WARN client(s) at <=-75 dBm; INFO no clients/APs."),
-    "fap_health": ("FortiAP radio channel utilization and noise floor.",
-                   "PASS radios uncongested; WARN channel util >=80% or noise > -80 dBm."),
+    "fap_managed": ("Managed FortiAP inventory and CAPWAP connection state.",
+                    "PASS all Connected; WARN any Disconnected/joining; INFO none managed."),
+    "fap_clients": ("Connected wireless clients (stations) and their auth state.",
+                    "PASS all authenticated; WARN client(s) not authenticated; INFO no clients/APs."),
+    "fap_health": ("FortiAP CAPWAP control/data tunnel to the controller.",
+                   "PASS all APs have an active tunnel; WARN any AP with no tunnel (0.0.0.0); INFO none."),
 }
 
 # Interactive tools (Advanced)

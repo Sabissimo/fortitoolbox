@@ -917,24 +917,48 @@ def _fsw_sync(meta, out, dev):
 def _fsw_poe(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    hot, total = [], 0
-    for b in re.split(r"(?=^FortiSwitch\s+[A-Z]{1,3}[0-9])", raw, flags=re.MULTILINE):
-        m = re.match(r"FortiSwitch\s+([A-Z]{1,3}[0-9][A-Z0-9]+)", b)
-        if not m:
+    # Real `switch-info poe summary` is per-switch blocks (the bare form is empty):
+    #   Managed Switch : <serial>  <id>
+    #   Unit Power Budget: 800.00W
+    #   Unit Power Consumption: 10.50W
+    #   <port table ... State (Delivering Power|Searching) ...>
+    # A switch may be printed twice; key by serial so the latest values win.
+    switches, cur = {}, None
+    for line in raw.splitlines():
+        m = re.match(r"\s*Managed Switch\s*:\s*(\S+)", line)
+        if m:
+            cur = m.group(1)
+            switches.setdefault(cur, {"budget": None, "cons": None, "ports": 0})
             continue
-        total += 1
-        pct = re.search(r"consumption:.*?\((\d+)%\)", b)
-        if pct and int(pct.group(1)) >= 90:
-            hot.append(m.group(1) + " " + pct.group(1) + "%")
-    if total == 0:
-        r.status, r.headline = Status.INFO, "No PoE-capable managed FortiSwitches"
+        if cur is None:
+            continue
+        b = re.match(r"\s*Unit Power Budget:\s*([\d.]+)", line)
+        if b:
+            switches[cur]["budget"] = float(b.group(1)); continue
+        c = re.match(r"\s*Unit Power Consumption:\s*([\d.]+)", line)
+        if c:
+            switches[cur]["cons"] = float(c.group(1)); continue
+        if "Delivering Power" in line:
+            switches[cur]["ports"] += 1
+    if not switches:
+        r.status, r.headline = Status.INFO, "No PoE data (no PoE-capable managed FortiSwitches)"
         return r
-    r.m("PoE switches", total)
+    hot, total_ports, worst = [], 0, 0.0
+    for serial, d in switches.items():
+        total_ports += d["ports"]
+        if d["budget"] and d["cons"] is not None and d["budget"] > 0:
+            pct = d["cons"] / d["budget"] * 100
+            worst = max(worst, pct)
+            if pct >= 90:
+                hot.append(serial + " " + "%.0f%%" % pct)
+    r.m("PoE switches", len(switches))
+    r.m("Powered ports", total_ports)
+    r.m("Peak budget use", "%.0f%%" % worst)
     if hot:
-        r.m("Near budget", ", ".join(hot))
         r.status, r.headline = Status.WARN, "PoE budget near limit: " + ", ".join(hot[:4])
     else:
-        r.status, r.headline = Status.PASS, str(total) + " FortiSwitch PoE budget(s) healthy"
+        r.status, r.headline = Status.PASS, (
+            str(len(switches)) + " FortiSwitch PoE within budget (peak %.0f%%)" % worst)
     return r
 
 
@@ -942,33 +966,31 @@ def _fsw_poe(meta, out, dev):
 def _fap_managed(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    blocks = [b for b in re.split(r"(?=^WTP ID:)", raw, flags=re.MULTILINE) if "serial-id" in b]
+    # Real `wlac -c wtp` = verbose per-WTP blocks delimited by a "----WTP N----"
+    # banner. Key lines per block: "WTP vd : <vd>, <idx>-<serial> ...",
+    # "name : <name>", "connection state : Connected|Disconnected (...)".
+    blocks = [b for b in re.split(r"-{5,}\s*WTP\s+\d+\s*-{5,}", raw) if "WTP vd" in b]
     if not blocks:
         r.status, r.headline = Status.INFO, "No managed FortiAPs (wireless controller not in use)"
         return r
-    down, off_ver = [], []
+    down = []
     for b in blocks:
-        sid = re.search(r"serial-id\s*:\s*(\S+)", b)
-        name = re.search(r"name\s*:\s*(\S+)", b)
-        state = re.search(r"state\s*:\s*([^\n]+)", b)
-        ver = re.search(r"os-version\s*:\s*\S*?v(\d+\.\d+)", b)
-        label = (name.group(1) if name else (sid.group(1) if sid else "?"))
-        st = (state.group(1) if state else "").lower()
-        if not ("run" in st or "connected" in st):
-            down.append(label + " (" + (state.group(1).strip() if state else "?") + ")")
-        elif ver and not ver.group(1).startswith("7."):   # target is 7.x.x
-            off_ver.append(label + " v" + ver.group(1))
+        sid = re.search(r"WTP vd\s*:\s*[^,]+,\s*\d+-(\S+)", b)
+        name = re.search(r"^\s*name\s*:\s*(\S.*?)\s*$", b, re.MULTILINE)
+        state = re.search(r"connection state\s*:\s*([^\n(]+)", b)
+        serial = sid.group(1) if sid else "?"
+        label = (name.group(1).strip() if name and name.group(1).strip() else serial)
+        st = (state.group(1).strip() if state else "")
+        connected = "connected" in st.lower() and "disconnected" not in st.lower()
+        if not connected:
+            down.append(label + " (" + (st or "?") + ")")
     r.m("Managed APs", len(blocks))
     r.m("Connected", len(blocks) - len(down))
     if down:
         r.m("Not connected", len(down))
-        r.status, r.headline = Status.WARN, "FortiAP not fully connected: " + "; ".join(down[:4])
-    elif off_ver:
-        r.m("Off-target firmware", ", ".join(off_ver[:4]))
-        r.status, r.headline = Status.WARN, (
-            str(len(off_ver)) + " FortiAP(s) not on 7.x: " + "; ".join(off_ver[:3]))
+        r.status, r.headline = Status.WARN, "FortiAP not connected: " + "; ".join(down[:4])
     else:
-        r.status, r.headline = Status.PASS, str(len(blocks)) + " FortiAP(s) connected (CWAS_RUN) on 7.x"
+        r.status, r.headline = Status.PASS, str(len(blocks)) + " FortiAP(s) connected"
     return r
 
 
@@ -976,25 +998,27 @@ def _fap_managed(meta, out, dev):
 def _fap_clients(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    rows = re.findall(
-        r"^\s*(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F:]{17})\s+(\S+)\s+\S+\s+(-?\d+)",
-        raw, re.MULTILINE)
-    total = re.search(r"Total STA:\s*(\d+)", raw)
-    if not rows and not total:
+    # Real `wlac -c sta` = verbose per-STA blocks ("----STA N----"); no RSSI here
+    # (that lives in `-d sta`). Key lines: "STA mac : <mac>", "authed : yes|no".
+    blocks = re.split(r"-{5,}\s*STA\s+\d+\s*-{5,}", raw)
+    macs, unauthed = [], []
+    for b in blocks:
+        m = re.search(r"STA mac\s*:\s*([0-9a-fA-F:]{17})", b)
+        if not m:
+            continue
+        macs.append(m.group(1))
+        au = re.search(r"^\s*authed\s*:\s*(\w+)", b, re.MULTILINE)
+        if not au or au.group(1).lower() != "yes":
+            unauthed.append(m.group(1))
+    if not macs:
         r.status, r.headline = Status.INFO, "No wireless clients / no managed APs"
         return r
-    weak = [m for m in rows if int(m[3]) <= -75]
-    per_ap = {}
-    for _, _, ap, _rssi in rows:
-        per_ap[ap] = per_ap.get(ap, 0) + 1
-    count = int(total.group(1)) if total else len(rows)
-    r.m("Clients", count)
-    r.m("APs serving", len(per_ap))
-    if weak:
-        r.m("Weak signal (<=-75dBm)", len(weak))
-        r.status, r.headline = Status.WARN, str(len(weak)) + " client(s) at weak signal (<=-75 dBm)"
+    r.m("Clients", len(macs))
+    if unauthed:
+        r.m("Not authenticated", len(unauthed))
+        r.status, r.headline = Status.WARN, str(len(unauthed)) + " wireless client(s) not authenticated"
     else:
-        r.status, r.headline = Status.PASS, str(count) + " wireless client(s), all healthy signal"
+        r.status, r.headline = Status.PASS, str(len(macs)) + " wireless client(s), all authenticated"
     return r
 
 
@@ -1002,24 +1026,26 @@ def _fap_clients(meta, out, dev):
 def _fap_health(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    utils, issues = [], []
-    for m in re.finditer(
-            r"channel\s+(\d+).*?noise\s+(-?\d+)dBm\s+chan-util\s+(\d+)%", raw):
-        ch, noise, util = m.group(1), int(m.group(2)), int(m.group(3))
-        utils.append(util)
-        if util >= 80:
-            issues.append("ch" + ch + " " + str(util) + "% util")
-        elif noise > -80:
-            issues.append("ch" + ch + " noise " + str(noise) + "dBm")
-    if not utils:
-        r.status, r.headline = Status.INFO, "No FortiAP radio data"
+    # Real `wlac -d wtp` = one compact line per AP:
+    #   vf=0 mpId=0 wtp=82 id=<name> base=<mac> <ip>:<port>(n)<->ctl:5247 use=N ...
+    # A non-zero data-tunnel endpoint after "<->" means the CAPWAP tunnel is up.
+    lines = [l for l in raw.splitlines() if "wtp=" in l and "id=" in l]
+    if not lines:
+        r.status, r.headline = Status.INFO, "No FortiAP CAPWAP tunnels"
         return r
-    r.m("Radios", len(utils))
-    r.m("Busiest channel util", str(max(utils)) + "%")
-    if issues:
-        r.status, r.headline = Status.WARN, "Radio contention: " + "; ".join(issues[:4])
+    down = []
+    for l in lines:
+        name = re.search(r"\bid=(\S+)", l)
+        tun = re.search(r"<->(\d+\.\d+\.\d+\.\d+):", l)
+        if not tun or tun.group(1) == "0.0.0.0":
+            down.append(name.group(1) if name else "?")
+    r.m("AP tunnels", len(lines))
+    if down:
+        r.m("No active tunnel", len(down))
+        r.status, r.headline = Status.WARN, (
+            "FortiAP with no active controller tunnel: " + ", ".join(down[:4]))
     else:
-        r.status, r.headline = Status.PASS, str(len(utils)) + " radio(s), all uncongested"
+        r.status, r.headline = Status.PASS, str(len(lines)) + " FortiAP CAPWAP tunnel(s) established"
     return r
 
 

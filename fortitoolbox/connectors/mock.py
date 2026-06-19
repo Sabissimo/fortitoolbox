@@ -353,60 +353,83 @@ FS1E48T419000001 (FS1E48T419000001)                    Up     -              -  
 FS1E48T419000002 (FS1E48T419000002)                    Up     -              -              -
 FS1E24T420000003 (FS1E24T420000003)                    Down   -              -              -
 """,
-    "diagnose switch-controller switch-info poe": """FortiSwitch FS1E48T419000001 (access-sw-1):
-  Max power budget : 370.0 W
-  Power consumption: 142.6 W (39%)
-  Powered ports    : 9
-FortiSwitch FS1E48T419000002 (access-sw-2):
-  Max power budget : 130.0 W
-  Power consumption: 121.4 W (93%)
-  Powered ports    : 6
-""",
-    # FortiAP (wireless-controller managed) -- seeded with one AP still joining
-    # and one congested 5GHz radio so the FortiAP tab shows a WARN/PASS mix.
-    "diagnose wireless-controller wlac -c wtp": """WTP CFG list:
+    # Real `poe summary` layout: per-switch Unit Power Budget/Consumption + port
+    # table. Seeded so switch #2 sits at ~93% of budget (WARN).
+    "diagnose switch-controller switch-info poe summary": """Vdom: root
+Managed Switch : FS1E48T419000001     0
+Unit Power Budget: 800.00W
+Unit Guard Band: 10.00W
+Unit Power Consumption: 142.60W
+Unit Poe Power Mode : Priority Based.
 
-WTP ID: FP231F-office-ap-1
-    serial-id  : FP231FTF22001111
-    name       : office-ap-1
-    os-version : FP231F-v7.4-build0476
-    state      : Connected (CWAS_RUN)
-    ip-addr    : 10.50.0.21
-    sta-count  : 18
-    uptime     : 12d04h11m
-WTP ID: FP231F-office-ap-2
-    serial-id  : FP231FTF22002222
-    name       : office-ap-2
-    os-version : FP231F-v7.4-build0476
-    state      : Connected (CWAS_RUN)
-    ip-addr    : 10.50.0.22
-    sta-count  : 7
-    uptime     : 12d04h09m
-WTP ID: FP221E-warehouse-ap-3
-    serial-id  : FP221ETF21003333
-    name       : warehouse-ap-3
-    os-version : FP221E-v7.2-build0301
-    state      : Discovered (CWAS_JOIN)
-    ip-addr    : 10.50.0.23
-    sta-count  : 0
-    uptime     : 0
 
-Total WTP: 3
+Interface   Status    State             Max-Power(W)   Power-consumption(W)   Priority   Class   Error
+------------------------------------------------------------------------------------------------------------
+port1       Enabled   Delivering Power  30.00          15.40                  Low        4
+port2       Enabled   Delivering Power  30.00          12.20                  Low        4
+port3       Enabled   Searching         0.00           0.00                   Low        0
+
+Managed Switch : FS1E48T419000002     0
+Unit Power Budget: 130.00W
+Unit Guard Band: 10.00W
+Unit Power Consumption: 121.40W
+Unit Poe Power Mode : Priority Based.
+
+
+Interface   Status    State             Max-Power(W)   Power-consumption(W)   Priority   Class   Error
+------------------------------------------------------------------------------------------------------------
+port1       Enabled   Delivering Power  30.00          29.50                  High       4
+port2       Enabled   Delivering Power  30.00          28.90                  High       4
 """,
-    "diagnose wireless-controller wlac -c sta": """sta_ip          sta_mac            ap_serial          vap          rssi  idle
-10.50.10.31     a4:83:e7:11:22:01  FP231FTF22001111   corp-wifi    -48    2
-10.50.10.32     a4:83:e7:11:22:02  FP231FTF22001111   corp-wifi    -55    0
-10.50.10.33     a4:83:e7:11:22:03  FP231FTF22001111   corp-wifi    -61    4
-10.50.10.78     a4:83:e7:11:22:7f  FP231FTF22002222   guest-wifi   -79   15
-10.50.10.79     a4:83:e7:11:22:80  FP231FTF22002222   guest-wifi   -67    1
-Total STA: 5
+    # FortiAP (wireless-controller managed). Formats match real FortiOS 7.6
+    # wlac output: -c wtp = verbose per-WTP blocks, -c sta = verbose per-STA
+    # blocks (no RSSI), -d wtp = one compact line per AP. Seeded with one
+    # Disconnected AP, one un-authed client, one AP with no tunnel (WARN mix).
+    "diagnose wireless-controller wlac -c wtp": """-------------------------------WTP    1----------------------------
+WTP vd               : root, 0-FP231FTF22001111    MP00
+    name             : office-ap-1
+    admin            : enable
+    wtp-profile      : cfg(FAP231F-default) override(disabled) oper(FAP231F-default)
+    active sw ver    : FP231F-v7.4-build0476
+    connection state : Connected (0-10.50.0.21:5246)
+    station info     : 18/18
+-------------------------------WTP    2----------------------------
+WTP vd               : root, 0-FP231FTF22002222    MP00
+    name             : office-ap-2
+    admin            : enable
+    active sw ver    : FP231F-v7.4-build0476
+    connection state : Connected (0-10.50.0.22:5246)
+    station info     : 7/7
+-------------------------------WTP    3----------------------------
+WTP vd               : root, 0-FP221ETF21003333    MP00
+    name             : warehouse-ap-3
+    admin            : enable
+    active sw ver    :
+    connection state : Disconnected (0-0.0.0.0:0)
+    station info     : 0/0
 """,
-    "diagnose wireless-controller wlac -d wtp": """WTP FP231FTF22001111 (office-ap-1):
-  Radio 1 802.11n/ax 2.4GHz : channel 6   txpower 17dBm  noise -94dBm  chan-util 34%  clients 11
-  Radio 2 802.11ac/ax 5GHz  : channel 36  txpower 20dBm  noise -96dBm  chan-util 52%  clients 7
-WTP FP231FTF22002222 (office-ap-2):
-  Radio 1 802.11n/ax 2.4GHz : channel 1   txpower 17dBm  noise -91dBm  chan-util 22%  clients 4
-  Radio 2 802.11ac/ax 5GHz  : channel 149 txpower 23dBm  noise -72dBm  chan-util 91%  clients 3
+    "diagnose wireless-controller wlac -c sta": """-------------------------------STA    1----------------------------
+STA mac              : a4:83:e7:11:22:01
+    live             : 1774 (ts=9982155)
+    authed           : yes  loc_authed
+    wtp              : 0-10.50.0.21:5246
+    rId              : 1
+    wId              : 2
+    bssid            : 00:39:11:b5:11:73
+-------------------------------STA    2----------------------------
+STA mac              : a4:83:e7:11:22:02
+    live             : 980 (ts=9982155)
+    authed           : yes  loc_authed
+    wtp              : 0-10.50.0.21:5246
+-------------------------------STA    3----------------------------
+STA mac              : a4:83:e7:11:22:7f
+    live             : 12 (ts=9982155)
+    authed           : no
+    wtp              : 0-10.50.0.22:5246
+""",
+    "diagnose wireless-controller wlac -d wtp": """vf=0 mpId=0 wtp=1 id=office-ap-1 base=00:39:11:b4:11:60 10.50.0.21:45808(81)<->10.255.255.1:5247 use=11     10.50.0.21:5246
+vf=0 mpId=0 wtp=2 id=office-ap-2 base=00:39:11:b4:11:61 10.50.0.22:45810(82)<->10.255.255.1:5247 use=9      10.50.0.22:5246
+vf=0 mpId=0 wtp=3 id=warehouse-ap-3 base=00:00:00:00:00:00 0.0.0.0:0(0)<->0.0.0.0:5247 use=0     0.0.0.0:5246
 """,
     "get user ldap": """== [ corp-ldap ]
 name        : corp-ldap
