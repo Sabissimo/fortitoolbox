@@ -29,13 +29,11 @@ LAMP = {
 LAMP_DEFAULT = "#30363D"
 
 HEAD = f"""
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {{ --ink:{INK}; --panel:{PANEL}; --line:{LINE}; --accent:{ACCENT}; }}
-  body {{ background:{INK}; color:{TXT}; font-family:'Inter',sans-serif; }}
+  body {{ background:{INK}; color:{TXT}; font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }}
   .ftb-title {{ font-weight:700; letter-spacing:.5px; }}
-  .ftb-mono, .nicegui-code, pre, code {{ font-family:'JetBrains Mono',monospace !important; }}
+  .ftb-mono, .nicegui-code, pre, code {{ font-family:'JetBrains Mono',ui-monospace,Consolas,'Courier New',monospace !important; }}
   .ftb-card {{ background:{PANEL}; border:1px solid {LINE}; border-radius:12px; }}
   .ftb-chip {{ background:{PANEL2}; color:{MUTED}; border:1px solid {LINE};
               border-radius:999px; padding:1px 9px; font-size:11px;
@@ -68,7 +66,6 @@ class State:
         self.busy = False             # a run is in progress
         self.console = None           # live SSH console session
         self.console_text = ""        # accumulated console output (for obfuscated copy)
-        self.console_expert = False   # bypass the read-only denylist
         self.console_scroll = False   # force console to bottom after a send
         self.flow_filter = ""         # debug flow filter text
         self.flow_count = 10          # debug flow packet count
@@ -1062,7 +1059,7 @@ def build():
                 .classes("ftb-chip").style(f"color:{LAMP[Status.WARN]}")
             console_log = ui.log(max_lines=3000).classes("w-full ftb-mono text-xs grow") \
                 .style(f"background:{INK};border:1px solid {LINE};border-radius:8px;min-height:340px")
-            cmd_in = ui.input(placeholder="command + Enter  (read-only; expert mode to override)") \
+            cmd_in = ui.input(placeholder="command + Enter  (read-only)") \
                 .classes("w-full ftb-mono").props("dark dense outlined")
 
             def _drain_console():
@@ -1089,8 +1086,8 @@ def build():
                 if not cmd or not _ensure_console():
                     return
                 from .connectors.console import is_blocked
-                if is_blocked(cmd) and not S.console_expert:
-                    ui.notify("Blocked by read-only guard — enable expert to override",
+                if is_blocked(cmd):
+                    ui.notify("Blocked by read-only guard — write/disruptive commands are not permitted",
                               type="negative")
                     return
                 S.console.send_line(cmd)
@@ -1108,7 +1105,6 @@ def build():
                           on_click=lambda: _ensure_console() and S.console.kill_debug()).props("dense outline")
                 ui.button("Clear", icon="clear_all",
                           on_click=lambda: (console_log.clear(), setattr(S, "console_text", ""))).props("dense flat")
-                ui.switch("expert").bind_value(S, "console_expert").props("dense")
                 ui.space()
                 ui.button("Obfuscate & copy", icon="content_copy", on_click=_copy_console).props("dense flat")
 

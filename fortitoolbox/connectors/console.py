@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import re
 
-# Lines that the console refuses to send unless "expert mode" is on.
+# Write/disruptive lines the read-only console always refuses to send.
 _DENY = re.compile(
     r"^\s*("
     r"config\b(?!\s+(global|vdom))"                # config ... (except global/vdom navigation)
