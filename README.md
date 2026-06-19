@@ -37,7 +37,7 @@ python3 -m venv .venv
 source .venv/bin/activate          # Linux / macOS
 # .venv\Scripts\activate           # Windows
 
-pip install fortitoolbox-0.4.4-py3-none-any.whl
+pip install -e .          # installs from the cloned source (tracks git pulls)
 fortitoolbox
 ```
 
