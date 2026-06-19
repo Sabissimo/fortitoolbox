@@ -140,6 +140,28 @@ def _set_filter(st):
     S.filter_status = None if (st is None or S.filter_status == st) else st
     tally_board.refresh()
     module_panel.refresh()
+    _update_tab_alerts()
+
+
+# Quasar palette names for the per-tab alert dot shown while a filter is active.
+_STATUS_QCOLOR = {Status.FAIL: "red", Status.WARN: "amber",
+                  Status.PASS: "green", Status.INFO: "blue", Status.SKIPPED: "grey"}
+
+
+def _update_tab_alerts():
+    """While a status filter is active, mark each module tab that contains a
+    matching check with a coloured alert dot, so the operator can see *where*
+    the filtered checks live without opening every tab. Cleared when no filter."""
+    st = S.filter_status
+    color = _STATUS_QCOLOR.get(st, "red")
+    for m, tab in getattr(S, "tab_els", {}).items():
+        n = 0
+        if st is not None:
+            n = sum(1 for c in _checks_in(m)
+                    if S.results.get(c["id"]) and S.results[c["id"]].status == st)
+        tab.props(remove="alert")
+        if n:
+            tab.props(add=f"alert={color}")
 
 
 def _toggle_sysdiag():
@@ -843,6 +865,7 @@ def _refresh_all():
     # the last module. Refresh with no args so each panel keeps its own module.
     identity_strip.refresh(); tally_board.refresh(); vdom_selector.refresh()
     module_panel.refresh()
+    _update_tab_alerts()
 
 
 # ---- actions ---------------------------------------------------------------
@@ -1136,9 +1159,12 @@ def build():
         modules = [c["module"] for c in S.catalog["checks"]]
         modules = list(dict.fromkeys(modules))
         tab_names = modules + ["Reference"]
+        S.tab_els = {}
         with ui.tabs().classes("w-full").props("dense") as tabs:
             for m in tab_names:
-                ui.tab(m)
+                t = ui.tab(m)
+                if m in modules:
+                    S.tab_els[m] = t
         with ui.tab_panels(tabs, value=modules[0]).classes("w-full").style("background:transparent"):
             for m in tab_names:
                 with ui.tab_panel(m).classes("gap-3"):
