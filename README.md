@@ -45,6 +45,22 @@ Open `http://localhost:8080`. It binds to localhost only — it holds a live SSH
 session and raw firewall output. **Connect** takes `host` or `host:port` (defaults
 to 22). Leave Demo mode on to explore without a device.
 
+> **Don't install the bundled `*.whl`** — it's a frozen release artifact and will
+> ignore the code you just cloned. Use `pip install -e .` as above.
+
+### Updating
+
+With the editable install, pull the latest and restart — no reinstall needed:
+
+```bash
+git pull
+fortitoolbox
+```
+
+Make sure your clone's `origin` points at your own fork
+(`git remote -v` → `github.com/Sabissimo/fortitoolbox`); a clone of a different
+upstream won't receive changes pushed to this fork.
+
 ## What it checks
 
 Each check returns a verdict plus the metric that matters, grouped into tabs:
