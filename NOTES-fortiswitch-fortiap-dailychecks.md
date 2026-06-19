@@ -6,10 +6,11 @@
 ## TL;DR — where we are
 
 - The **existing** FortiSwitch + FortiAP checks (6 of them) are **shipped and validated** against real device output.
-- **DONE this session (uncommitted, in working tree):**
+- **DONE — committed & merged to `main`, pushed to origin as `92c35a2`:**
   - `fap_radio` (#6–9) — new check: channel utilisation / noise / firmware / uptime from `-c wtp`. Validated in Demo (WARN) and against the **real `GC-AP-09`** output (PASS, peak util 3%).
   - `fsw_poe` (#5) — extended to flag per-port PoE faults (overload/short/denied) from the `poe summary` table it already parses. Demo seeds a faulted port → WARN.
-- **Next action when we resume:** decide #2 (FortiSwitch firmware compliance) — see below — then optionally commit. Medium/high items (#1, #3, #4, #10, #11) deferred.
+  - `fsw_managed` (#2) — firmware target made configurable via catalog `target_fw` (default 7.6).
+- **Next action when we resume:** medium/high items (#1, #3, #4, #10, #11) are deferred — pick one up on demand. See "Status by item" below.
 
 ---
 
@@ -76,7 +77,7 @@ Shipped on `main`, all parsers calibrated to real FortiOS 7.6 output and matchin
 - `fortitoolbox/reference.py` — added `fap_radio`; updated `fsw_poe` and `fsw_managed` descriptions.
 - `fortitoolbox/catalog.yaml` — also added `target_fw: "7.6"` to `fsw_managed`; `parsers.py` `_fsw_managed` now reads it (configurable firmware target, #2).
 
-Verified in Demo via the mock: `fap_radio` WARN (busy radio) / PASS on real `GC-AP-09`; `fsw_poe` WARN (port fault); `fap_managed` unchanged. **Not yet committed.**
+Verified in Demo via the mock: `fap_radio` WARN (busy radio) / PASS on real `GC-AP-09`; `fsw_poe` WARN (port fault); `fap_managed` unchanged. **Committed as `92c35a2`, merged to `main`, pushed to origin.**
 
 ### `fap_radio` design notes (as built)
 - Verdict priority: busy radio (≥70% newest chutil) → recent reboot (join_time <24h) → firmware drift (>1 distinct version) → PASS. Noise floor is a metric only (threshold pending real-world tuning).
