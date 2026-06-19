@@ -854,25 +854,28 @@ def _fsw_managed(meta, out, dev):
     if not rows:
         r.status, r.headline = Status.INFO, "No managed FortiSwitches (FortiLink not in use)"
         return r
+    target = str(meta.get("target_fw", "7.6"))     # firmware-compliance target (catalog-driven)
+    prefix = "v" + target                          # version strings look like "v7.6.6"
     down, off_ver = [], []
     for sid, ver, status in rows:
         st = status.lower()
         if not ("up" in st and "auth" in st):
             down.append(sid + " (" + status + ")")
-        elif not ver.startswith("v7.6"):            # target is 7.6.x
+        elif not ver.startswith(prefix):
             off_ver.append(sid + " " + ver)
     r.m("Managed switches", len(rows))
     r.m("Up", len(rows) - len(down))
+    r.m("Target firmware", target + ".x")
     if down:
         r.m("Down/unauthorized", len(down))
         r.status, r.headline = Status.FAIL, "FortiSwitch down/unauthorized: " + "; ".join(down[:4])
     elif off_ver:
         r.m("Off-target firmware", ", ".join(off_ver[:4]))
         r.status, r.headline = Status.WARN, (
-            str(len(off_ver)) + " FortiSwitch(es) not on 7.6.x: " + "; ".join(off_ver[:3]))
+            str(len(off_ver)) + " FortiSwitch(es) not on " + target + ".x: " + "; ".join(off_ver[:3]))
     else:
         r.status, r.headline = Status.PASS, (
-            str(len(rows)) + " FortiSwitch(es) authorized & up on 7.6.x")
+            str(len(rows)) + " FortiSwitch(es) authorized & up on " + target + ".x")
     return r
 
 
@@ -924,11 +927,12 @@ def _fsw_poe(meta, out, dev):
     #   <port table ... State (Delivering Power|Searching) ...>
     # A switch may be printed twice; key by serial so the latest values win.
     switches, cur = {}, None
+    _fault = re.compile(r"fault|overload|short|denied|deny|undervoltage|invalid", re.I)
     for line in raw.splitlines():
         m = re.match(r"\s*Managed Switch\s*:\s*(\S+)", line)
         if m:
             cur = m.group(1)
-            switches.setdefault(cur, {"budget": None, "cons": None, "ports": 0})
+            switches.setdefault(cur, {"budget": None, "cons": None, "ports": 0, "faults": []})
             continue
         if cur is None:
             continue
@@ -940,12 +944,19 @@ def _fsw_poe(meta, out, dev):
             switches[cur]["cons"] = float(c.group(1)); continue
         if "Delivering Power" in line:
             switches[cur]["ports"] += 1
+        # per-port fault (State/Error column): flag overload/short/denied/fault rows
+        pm = re.match(r"\s*(port\S+)\b", line)
+        if pm:
+            fk = _fault.search(line)
+            if fk:
+                switches[cur]["faults"].append(pm.group(1) + " (" + fk.group(0).lower() + ")")
     if not switches:
         r.status, r.headline = Status.INFO, "No PoE data (no PoE-capable managed FortiSwitches)"
         return r
-    hot, total_ports, worst = [], 0, 0.0
+    hot, faulted, total_ports, worst = [], [], 0, 0.0
     for serial, d in switches.items():
         total_ports += d["ports"]
+        faulted += [serial + " " + fp for fp in d["faults"]]
         if d["budget"] and d["cons"] is not None and d["budget"] > 0:
             pct = d["cons"] / d["budget"] * 100
             worst = max(worst, pct)
@@ -954,7 +965,11 @@ def _fsw_poe(meta, out, dev):
     r.m("PoE switches", len(switches))
     r.m("Powered ports", total_ports)
     r.m("Peak budget use", "%.0f%%" % worst)
-    if hot:
+    if faulted:
+        r.m("Port faults", len(faulted))
+    if faulted:
+        r.status, r.headline = Status.WARN, "PoE port fault: " + ", ".join(faulted[:4])
+    elif hot:
         r.status, r.headline = Status.WARN, "PoE budget near limit: " + ", ".join(hot[:4])
     else:
         r.status, r.headline = Status.PASS, (
@@ -1046,6 +1061,106 @@ def _fap_health(meta, out, dev):
             "FortiAP with no active controller tunnel: " + ", ".join(down[:4]))
     else:
         r.status, r.headline = Status.PASS, str(len(lines)) + " FortiAP CAPWAP tunnel(s) established"
+    return r
+
+
+@parser("fap_radio")
+def _fap_radio(meta, out, dev):
+    raw = _first(out)
+    r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
+    # Reuses the `-c wtp` verbose blocks (same dump as fap_managed). Per AP we read
+    # firmware (`active sw ver`) and uptime (`join_time`); per AP-mode radio we read
+    # band (`radio_type`), `oper chan`, `noise_floor`, and the *newest* channel-util
+    # sample (last value before `->newer` on `oper chutil data`). Verdict = peak
+    # channel utilisation; firmware drift and recent reboots also raise WARN.
+    blocks = [b for b in re.split(r"-{5,}\s*WTP\s+\d+\s*-{5,}", raw) if "WTP vd" in b]
+    if not blocks:
+        r.status, r.headline = Status.INFO, "No managed FortiAPs (wireless controller not in use)"
+        return r
+
+    def _band(rtype):
+        if "_6G" in rtype:
+            return "6GHz"
+        if "_5G" in rtype:
+            return "5GHz"
+        if "_2G" in rtype:
+            return "2.4GHz"
+        return rtype or "?"
+
+    radios = []          # (label, band, chan, util)
+    worst_noise = None   # (noise_int, label, band)
+    fw = {}              # label -> version
+    busy, recent_reboot = [], []
+    for b in blocks:
+        sid = re.search(r"WTP vd\s*:\s*[^,]+,\s*\d+-(\S+)", b)
+        name = re.search(r"^\s*name\s*:\s*(\S.*?)\s*$", b, re.MULTILINE)
+        label = (name.group(1).strip() if name and name.group(1).strip()
+                 else (sid.group(1) if sid else "?"))
+        v = re.search(r"^[ \t]*active sw ver[ \t]*:[ \t]*(\S+)", b, re.MULTILINE)
+        if v:
+            fw[label] = v.group(1)
+        # uptime: join_time vs now; recent join => recent reboot
+        jt = re.search(r"^\s*join_time\s*:\s*(.+?)\s*$", b, re.MULTILINE)
+        if jt:
+            try:
+                joined = _dt.datetime.strptime(" ".join(jt.group(1).split()),
+                                               "%a %b %d %H:%M:%S %Y")
+                if (_dt.datetime.now() - joined).total_seconds() < 86400:
+                    recent_reboot.append(label)
+            except (ValueError, OverflowError):
+                pass
+        # per-radio: only radios actively serving as "AP"
+        for m in re.finditer(r"Radio\s+\d+\s*:\s*(.+?)\n(.*?)(?=\n\s*Radio\s+\d+\s*:|\Z)",
+                             b, re.DOTALL):
+            if m.group(1).strip() != "AP":
+                continue
+            body = m.group(2)
+            rt = re.search(r"radio_type\s*:\s*(\S+)", body)
+            band = _band(rt.group(1) if rt else "")
+            ch = re.search(r"oper chan\s*:\s*(\d+)", body)
+            chan = ch.group(1) if ch else "?"
+            nf = re.search(r"noise_floor\s*:\s*(-?\d+)", body)
+            if nf:
+                n = int(nf.group(1))
+                if worst_noise is None or n > worst_noise[0]:   # closer to 0 = noisier
+                    worst_noise = (n, label, band)
+            cu = re.search(r"oper chutil data\s*:\s*([\d,\s]+?)(?:->newer|$)", body)
+            util = None
+            if cu:
+                nums = re.findall(r"\d+", cu.group(1))
+                if nums:
+                    util = int(nums[-1])         # newest sample is rightmost
+            radios.append((label, band, chan, util))
+            if util is not None and util >= 70:
+                busy.append("%s %s ch%s %d%%" % (label, band, chan, util))
+
+    if not radios:
+        r.status, r.headline = Status.INFO, "No AP-mode radios reporting (APs down or in monitor mode)"
+        return r
+
+    utils = [u for *_, u in radios if u is not None]
+    peak = max(utils) if utils else None
+    peak_lbl = next(("%s %s ch%s" % (l, bd, c) for l, bd, c, u in radios if u == peak), "")
+    versions = sorted(set(fw.values()))
+
+    r.m("AP radios", len(radios))
+    r.m("Peak channel util", ("%d%% (%s)" % (peak, peak_lbl)) if peak is not None else "n/a")
+    if worst_noise:
+        r.m("Worst noise floor", "%d dBm (%s %s)" % worst_noise)
+    if versions:
+        r.m("Firmware", versions[0] if len(versions) == 1 else "mixed: " + ", ".join(versions))
+
+    if busy:
+        r.status, r.headline = Status.WARN, "Radio(s) heavily loaded: " + "; ".join(busy[:4])
+    elif recent_reboot:
+        r.status, r.headline = Status.WARN, (
+            "FortiAP rebooted in last 24h: " + ", ".join(sorted(set(recent_reboot))[:4]))
+    elif len(versions) > 1:
+        r.status, r.headline = Status.WARN, "FortiAP firmware drift: " + ", ".join(versions)
+    else:
+        r.status, r.headline = Status.PASS, (
+            "%d AP radio(s) healthy" % len(radios)
+            + (", peak util %d%%" % peak if peak is not None else ""))
     return r
 
 

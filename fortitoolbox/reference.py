@@ -66,11 +66,11 @@ REFERENCE = {
             "FAIL no resolution or no server ready; WARN partial loss / a server not ready; PASS resolves + ready."),
     # FortiSwitch (FortiLink-managed, queried from the FortiGate)
     "fsw_managed": ("Managed FortiSwitch inventory, firmware and FortiLink link state.",
-                    "PASS all Authorized/Up on 7.6.x; WARN off-target firmware; FAIL any down/unauthorized; INFO none managed."),
+                    "PASS all Authorized/Up on the catalog target firmware (`target_fw`, default 7.6.x); WARN off-target firmware; FAIL any down/unauthorized; INFO none managed."),
     "fsw_sync": ("FortiSwitch configuration sync status.",
                  "PASS all in-sync; FAIL any sync error; INFO none managed."),
-    "fsw_poe": ("Per-switch live PoE draw vs power budget (from `poe summary`).",
-                "PASS within budget; WARN any switch >=90% of budget; INFO no PoE switches."),
+    "fsw_poe": ("Per-switch live PoE draw vs budget plus per-port faults (from `poe summary`).",
+                "PASS within budget; WARN any port faulted (overload/short/denied) or any switch >=90% of budget; INFO no PoE switches."),
     # FortiAP (wireless-controller managed, queried from the FortiGate)
     "fap_managed": ("Managed FortiAP inventory and CAPWAP connection state.",
                     "PASS all Connected; WARN any Disconnected/joining; INFO none managed."),
@@ -78,6 +78,8 @@ REFERENCE = {
                     "PASS all authenticated; WARN client(s) not authenticated; INFO no clients/APs."),
     "fap_health": ("FortiAP CAPWAP control/data tunnel to the controller.",
                    "PASS all APs have an active tunnel; WARN any AP with no tunnel (0.0.0.0); INFO none."),
+    "fap_radio": ("FortiAP radio load (channel utilisation), noise floor, firmware and uptime (from `-c wtp`).",
+                  "PASS radios within load; WARN any radio >=70% channel utilisation, firmware drift across APs, or an AP rebooted in the last 24h; INFO no AP-mode radios. Noise floor reported as a metric (not yet verdict-driving)."),
 }
 
 # Interactive tools (Advanced)

@@ -368,6 +368,7 @@ Interface   Status    State             Max-Power(W)   Power-consumption(W)   Pr
 port1       Enabled   Delivering Power  30.00          15.40                  Low        4
 port2       Enabled   Delivering Power  30.00          12.20                  Low        4
 port3       Enabled   Searching         0.00           0.00                   Low        0
+port4       Enabled   Fault             0.00           0.00                   Low        0       Overload
 
 Managed Switch : FS1E48T419000002     0
 Unit Power Budget: 130.00W
@@ -391,15 +392,47 @@ WTP vd               : root, 0-FP231FTF22001111    MP00
     admin            : enable
     wtp-profile      : cfg(FAP231F-default) override(disabled) oper(FAP231F-default)
     active sw ver    : FP231F-v7.4-build0476
+    join_time        : Mon Jun  1 09:14:22 2026
     connection state : Connected (0-10.50.0.21:5246)
     station info     : 18/18
+  Radio 1            : AP
+    radio_type       : 11AC_5G
+    oper chan        : 36
+    noise_floor      : -92
+    chutil           : enabled
+    oper chutil data : 70,72,71,73,74, 75,73,76,74,75, 74,76,75,74,75 ->newer
+    station info     : 14/14
+  Radio 2            : AP
+    radio_type       : 11N_2G
+    oper chan        : 6
+    noise_floor      : -82
+    chutil           : enabled
+    oper chutil data : 20,22,21,23,22, 21,23,22,24,22, 23,22,21,23,22 ->newer
+    station info     : 4/4
+  Radio 3            : Monitor
+      sensor mode    : disabled
 -------------------------------WTP    2----------------------------
 WTP vd               : root, 0-FP231FTF22002222    MP00
     name             : office-ap-2
     admin            : enable
     active sw ver    : FP231F-v7.4-build0476
+    join_time        : Sun May 31 18:02:10 2026
     connection state : Connected (0-10.50.0.22:5246)
     station info     : 7/7
+  Radio 1            : AP
+    radio_type       : 11AC_5G
+    oper chan        : 149
+    noise_floor      : -90
+    chutil           : enabled
+    oper chutil data : 8,9,7,8,10, 9,8,7,9,8, 7,8,9,8,9 ->newer
+    station info     : 5/5
+  Radio 2            : AP
+    radio_type       : 11N_2G
+    oper chan        : 1
+    noise_floor      : -85
+    chutil           : enabled
+    oper chutil data : 12,11,13,12,11, 13,12,11,12,13, 11,12,13,12,11 ->newer
+    station info     : 2/2
 -------------------------------WTP    3----------------------------
 WTP vd               : root, 0-FP221ETF21003333    MP00
     name             : warehouse-ap-3

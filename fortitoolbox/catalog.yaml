@@ -311,6 +311,7 @@ checks:
     cmds: ["execute switch-controller get-conn-status"]
     privilege: read
     verify: true
+    target_fw: "7.6"   # firmware-compliance target; switches not on v<target>.x => WARN
     note: "FortiLink-managed switches; INFO if none are managed by this device/VDOM."
     kits: [quick, full]
 
@@ -366,6 +367,16 @@ checks:
     privilege: sysdiag
     verify: true
     note: "One line per AP; a non-zero data-tunnel endpoint means the CAPWAP tunnel is up."
+    kits: [full]
+
+  - id: fap_radio
+    scope: vdom
+    module: FortiAP
+    title: FortiAP radio load, noise & firmware
+    cmds: ["diagnose wireless-controller wlac -c wtp"]
+    privilege: sysdiag
+    verify: true
+    note: "Reuses the `-c wtp` dump (same as fap_managed): per-AP-mode radio it reads channel utilisation (newest `oper chutil` sample), noise floor and oper channel, plus per-AP firmware (`active sw ver`) and uptime (`join_time`). Verdict = peak channel utilisation; WARN >=70%. Noise/firmware reported as metrics (thresholds pending real-world tuning)."
     kits: [full]
 
   # ---------------- Advanced (stateful / interactive / write) ----------------
