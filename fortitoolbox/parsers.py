@@ -880,18 +880,36 @@ def _fsw_managed(meta, out, dev):
 def _fsw_sync(meta, out, dev):
     raw = _first(out)
     r = CheckResult(meta["id"], meta["module"], meta["title"], raw=raw)
-    rows = re.findall(r"^\s*([A-Z]{1,3}[0-9][A-Z0-9]{6,})\s+(.+)$", raw, re.MULTILINE)
-    if not rows:
+    # Real `get-sync-status all` is a column table:
+    #   SWITCH-ID (SERIAL)   STATUS  CONFIG  MAC-SYNC  HTTP-UPGRADE
+    #   FS2F48TV1111 (...)   Up      -       -         -
+    # Healthy = STATUS Up and every sync column "-" (nothing pending/failed).
+    down, pending, total = [], [], 0
+    for line in raw.splitlines():
+        m = re.match(r"\s*([A-Z]{1,3}[0-9][A-Z0-9]{6,})\s+\([^)]*\)\s+(.+)$", line)
+        if not m:
+            continue
+        total += 1
+        serial, cols = m.group(1), m.group(2).split()
+        status = cols[0] if cols else "?"
+        flags = [f for f in cols[1:] if f not in ("-", "")]
+        if status.lower() != "up":
+            down.append(serial + " (" + status + ")")
+        elif flags:
+            pending.append(serial + " (" + ",".join(flags) + ")")
+    if total == 0:
         r.status, r.headline = Status.INFO, "No managed FortiSwitches to sync"
         return r
-    bad = [s for s, st in rows if "in-sync" not in st.lower()]
-    r.m("Switches", len(rows))
-    r.m("In-sync", len(rows) - len(bad))
-    if bad:
+    r.m("Switches", total)
+    r.m("In-sync", total - len(down) - len(pending))
+    if down:
         r.status, r.headline = Status.FAIL, (
-            str(len(bad)) + " FortiSwitch config(s) out-of-sync: " + ", ".join(bad[:4]))
+            str(len(down)) + " FortiSwitch(es) not up/synced: " + ", ".join(down[:4]))
+    elif pending:
+        r.status, r.headline = Status.WARN, (
+            str(len(pending)) + " FortiSwitch(es) with sync pending: " + "; ".join(pending[:4]))
     else:
-        r.status, r.headline = Status.PASS, "All " + str(len(rows)) + " FortiSwitch config(s) in-sync"
+        r.status, r.headline = Status.PASS, "All " + str(total) + " FortiSwitch config(s) in-sync"
     return r
 
 

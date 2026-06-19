@@ -347,10 +347,11 @@ name=HQ-to-Branch2 ver=2 serial=2 198.51.100.20:500->203.0.113.2:500
  Flags: C=config sync, U=upgrading, S=staged, D=delayed reboot pending, E=config sync error, 2=L2, 3=L3, V=VXLAN, T=tunnel, X=External
  Managed-Switches: 3 (UP: 2 DOWN: 1 MAX: 96)
 """,
-    "execute switch-controller get-sync-status all": """Switch-ID           Sync-Status
- FS1E48T419000001    in-sync
- FS1E48T419000002    in-sync
- FS1E24T420000003    sync-error (config download failed)
+    "execute switch-controller get-sync-status all": """FortiLink interface : fortilink
+SWITCH-ID (SERIAL)                                      STATUS CONFIG         MAC-SYNC       HTTP-UPGRADE
+FS1E48T419000001 (FS1E48T419000001)                    Up     -              -              -
+FS1E48T419000002 (FS1E48T419000002)                    Up     -              -              -
+FS1E24T420000003 (FS1E24T420000003)                    Down   -              -              -
 """,
     "diagnose switch-controller switch-info poe": """FortiSwitch FS1E48T419000001 (access-sw-1):
   Max power budget : 370.0 W
