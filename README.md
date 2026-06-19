@@ -30,7 +30,7 @@ without touching a box.
 Python 3.10+. No compiled dependencies (NiceGUI, netmiko, PyYAML).
 
 ```bash
-git clone https://github.com/Metzcall/fortitoolbox.git
+git clone https://github.com/Sabissimo/fortitoolbox.git
 cd fortitoolbox
 
 python3 -m venv .venv

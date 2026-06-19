@@ -29,7 +29,7 @@ The catalog is data. Adding a check is **one YAML entry + one parser**:
 ## Dev setup
 
 ```bash
-git clone https://github.com/Metzcall/fortitoolbox.git
+git clone https://github.com/Sabissimo/fortitoolbox.git
 cd fortitoolbox
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e .          # editable install

@@ -91,7 +91,7 @@ class _Pdf:
             self._txt(PAGE_W - LEFT - 220, PAGE_H - 42, self._subtitle, size=9, color=(0.74, 0.78, 0.82))
         # footer
         self._rect(0, 36, PAGE_W, 0.6, LINECOL)
-        self._txt(LEFT, 24, "github.com/Metzcall/fortitoolbox", size=8, color=MUTED)
+        self._txt(LEFT, 24, "github.com/Sabissimo/fortitoolbox", size=8, color=MUTED)
         self._txt(PAGE_W - LEFT - 170, 24,
                   "MIT  -  generated " + _dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
                   size=8, color=MUTED)
