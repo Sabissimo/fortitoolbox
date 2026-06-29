@@ -6,3 +6,6 @@ venv/
 build/
 dist/
 .DS_Store
+
+# Playwright MCP test artifacts
+.playwright-mcp/

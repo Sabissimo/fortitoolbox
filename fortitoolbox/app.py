@@ -7,6 +7,7 @@ element is the live verdict board (pass/warn/fail tally + device identity strip)
 from __future__ import annotations
 
 import re
+import time
 
 from typing import Dict, List, Optional
 
@@ -58,6 +59,116 @@ HEAD = f"""
 """
 
 
+# ---- easter egg: Snake -----------------------------------------------------
+# Self-contained HTML5-canvas Snake. The logic runs entirely client-side; we
+# inject it with run_javascript once the dialog is shown (so #ftb-snake exists
+# in the DOM) and tear it down again on hide so no timer leaks in the
+# background. Colours match the dashboard tokens above.
+SNAKE_JS = r"""
+(function(){
+  var cv = document.getElementById('ftb-snake');
+  if(!cv) return;
+  var ctx = cv.getContext('2d');
+  var N = 20, CELL = cv.width / N;
+  var snake, dir, nextDir, food, score, dead, best;
+  best = window.__ftbSnakeBest || 0;
+  function rnd(){ return Math.floor(Math.random()*N); }
+  function placeFood(){ do { food = {x:rnd(), y:rnd()}; }
+    while(snake.some(function(s){return s.x===food.x && s.y===food.y;})); }
+  function reset(){
+    snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+    dir = {x:1,y:0}; nextDir = dir; score = 0; dead = false; placeFood();
+  }
+  function step(){
+    if(dead) return;
+    dir = nextDir;
+    var head = {x:(snake[0].x+dir.x+N)%N, y:(snake[0].y+dir.y+N)%N};
+    if(snake.some(function(s){return s.x===head.x && s.y===head.y;})){
+      dead = true; best = Math.max(best, score); window.__ftbSnakeBest = best;
+      draw(); return;
+    }
+    snake.unshift(head);
+    if(head.x===food.x && head.y===food.y){ score++; placeFood(); } else { snake.pop(); }
+    draw();
+  }
+  function draw(){
+    ctx.fillStyle='#0E1116'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#EE3124';
+    ctx.fillRect(food.x*CELL+2, food.y*CELL+2, CELL-4, CELL-4);
+    for(var i=0;i<snake.length;i++){
+      ctx.fillStyle = i===0 ? '#3FB950' : '#2C8C3C';
+      ctx.fillRect(snake[i].x*CELL+1, snake[i].y*CELL+1, CELL-2, CELL-2);
+    }
+    ctx.fillStyle='#E6EDF3'; ctx.font='12px monospace'; ctx.textAlign='left';
+    ctx.fillText('SCORE '+score+'   BEST '+best, 6, 14);
+    if(dead){
+      ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.fillStyle='#F85149'; ctx.font='bold 22px monospace'; ctx.textAlign='center';
+      ctx.fillText('GAME OVER', cv.width/2, cv.height/2-6);
+      ctx.fillStyle='#8B949E'; ctx.font='12px monospace';
+      ctx.fillText('press Enter / Space to restart', cv.width/2, cv.height/2+18);
+      ctx.textAlign='left';
+    }
+  }
+  function key(e){
+    var k = e.key;
+    if(k==='ArrowUp' && dir.y===0){ nextDir={x:0,y:-1}; }
+    else if(k==='ArrowDown' && dir.y===0){ nextDir={x:0,y:1}; }
+    else if(k==='ArrowLeft' && dir.x===0){ nextDir={x:-1,y:0}; }
+    else if(k==='ArrowRight' && dir.x===0){ nextDir={x:1,y:0}; }
+    else if((k==='Enter' || k===' ') && dead){ reset(); }
+    else return;
+    e.preventDefault();
+  }
+  if(window.__ftbSnake){
+    clearInterval(window.__ftbSnake.timer);
+    document.removeEventListener('keydown', window.__ftbSnake.key, true);
+  }
+  reset(); draw();
+  var timer = setInterval(step, 110);
+  document.addEventListener('keydown', key, true);
+  window.__ftbSnake = {timer:timer, key:key};
+})();
+"""
+
+SNAKE_STOP_JS = r"""
+if(window.__ftbSnake){
+  clearInterval(window.__ftbSnake.timer);
+  document.removeEventListener('keydown', window.__ftbSnake.key, true);
+  window.__ftbSnake = null;
+}
+"""
+
+
+def open_snake_dialog():
+    with ui.dialog() as dialog, ui.card().classes("ftb-card p-4 gap-2").style("min-width:392px"):
+        with ui.row().classes("items-center w-full gap-3"):
+            ui.label("SNAKE").classes("ftb-title text-lg").style(f"color:{ACCENT}")
+            ui.label("you found it").classes("ftb-eyebrow")
+            ui.space()
+            ui.button(icon="close", on_click=dialog.close).props("flat dense round")
+        ui.html('<canvas id="ftb-snake" width="360" height="360" '
+                'style="border:1px solid #2A313C;border-radius:8px;display:block;'
+                'image-rendering:pixelated;"></canvas>')
+        ui.label("Arrow keys to steer · Enter / Space to restart").classes("ftb-eyebrow")
+    # Start once the canvas is in the DOM; stop the loop when the dialog closes.
+    dialog.on("show", lambda: ui.run_javascript(SNAKE_JS))
+    dialog.on("hide", lambda: ui.run_javascript(SNAKE_STOP_JS))
+    dialog.open()
+
+
+def _logo_tap():
+    """Three quick taps on the wordmark hatch the Snake easter egg."""
+    now = time.monotonic()
+    if now - S.logo_last > 1.2:      # too slow → it's a fresh streak
+        S.logo_clicks = 0
+    S.logo_last = now
+    S.logo_clicks += 1
+    if S.logo_clicks >= 3:
+        S.logo_clicks = 0
+        open_snake_dialog()
+
+
 class State:
     def __init__(self):
         self.catalog = load_catalog()
@@ -100,6 +211,8 @@ class State:
         self.auth_running = False
         self.auth_result = None        # {res, conclusions}  (password never stored)
         self.ref_filter = ""           # in-app reference search
+        self.logo_clicks = 0           # easter egg: taps on the FORTITOOLBOX wordmark
+        self.logo_last = 0.0           # monotonic time of the last tap
 
 
 S = State()
@@ -122,7 +235,9 @@ def _mask(serial: str) -> str:
 def identity_strip():
     d = S.device
     with ui.row().classes("items-center gap-6 w-full"):
-        ui.label("FORTITOOLBOX").classes("ftb-title text-lg").style(f"color:{ACCENT}")
+        ui.label("FORTITOOLBOX").classes("ftb-title text-lg") \
+            .style(f"color:{ACCENT};cursor:pointer;user-select:none") \
+            .on("click", _logo_tap).tooltip("FortiToolbox")
         ui.label("operator diagnostics").classes("ftb-eyebrow")
         ui.space()
         if d:
