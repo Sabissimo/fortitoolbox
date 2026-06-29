@@ -12,6 +12,7 @@ from typing import Dict, List, Optional
 
 from nicegui import app, run, ui
 
+from . import addressbook
 from .connectors.base import DeviceInfo
 from .connectors.mock import MockConnector
 from .engine import Engine, load_catalog
@@ -915,6 +916,13 @@ async def run_ids(ids: List[str], label: str):
               type="negative" if fails else ("warning" if (warns or skips) else "positive"))
 
 
+def _contact_opts(contacts):
+    """{host: label} for the contacts select; show name only when it adds info."""
+    return {c["host"]: (f'{c["name"]}  ·  {c["host"]}'
+                        if c["name"] != c["host"] else c["host"])
+            for c in contacts}
+
+
 def open_connect_dialog():
     with ui.dialog() as dialog, ui.card().classes("ftb-card p-5 gap-3").style("min-width:360px"):
         ui.label("Connect to FortiGate").classes("ftb-title")
@@ -922,11 +930,62 @@ def open_connect_dialog():
         vdom_demo = ui.switch("Simulate VDOMs (demo)", value=False)
         vdom_demo.bind_enabled_from(mock, "value")
         diagcap = ui.switch("Account has diagnose (system-diagnostics)", value=False)
+
+        # --- local address book (stores host only, never credentials) --------
+        contacts = addressbook.load()
+        by_host = {c["host"]: c["name"] for c in contacts}   # host -> saved label
+        book = ui.select(options=_contact_opts(contacts), label="Saved contacts",
+                         with_input=True, clearable=True) \
+            .classes("w-full").props("dark dense outlined")
+
         host = ui.input("Host / IP", placeholder="host  or  host:port  (default 22)").classes("w-full").props("dark dense outlined")
         user = ui.input("Username (read-only)").classes("w-full").props("dark dense outlined")
         pwd = ui.input("Password", password=True).classes("w-full").props("dark dense outlined")
-        for f in (host, user, pwd):
+
+        # Picking a contact fills host + label and jumps to username;
+        # clearing the contact clears the label too.
+        def _label_of(h):
+            name = by_host.get(h, "")
+            return "" if name == h else name      # host-as-name means "no label"
+
+        def _pick():
+            if book.value:
+                host.value = book.value
+                label.value = _label_of(book.value)
+                user.run_method("focus")
+            else:
+                label.value = ""
+        book.on("update:model-value", _pick)
+
+        with ui.row().classes("w-full items-center gap-2"):
+            label = ui.input("Label (optional)").classes("flex-grow").props("dark dense outlined")
+
+            def _save_contact():
+                h = (host.value or "").strip()
+                if not h:
+                    ui.notify("Enter a host first", type="warning"); return
+                cs = addressbook.add(h, label.value)
+                by_host.clear(); by_host.update({c["host"]: c["name"] for c in cs})
+                book.set_options(_contact_opts(cs), value=h)
+                label.value = _label_of(h)
+                ui.notify(f"Saved {h} to address book", type="positive")
+
+            def _remove_contact():
+                if not book.value:
+                    ui.notify("Pick a contact to remove", type="warning"); return
+                h = book.value
+                cs = addressbook.remove(h)
+                by_host.clear(); by_host.update({c["host"]: c["name"] for c in cs})
+                book.set_options(_contact_opts(cs), value=None)
+                label.value = ""
+                ui.notify(f"Removed {h} from address book")
+
+            ui.button("Save", icon="bookmark_add", on_click=_save_contact).props("flat dense")
+            ui.button("Delete", icon="bookmark_remove", on_click=_remove_contact).props("flat dense")
+
+        for f in (book, host, user, pwd, label):
             f.bind_enabled_from(mock, "value", lambda v: not v)
+
         pwd.on("keydown.enter", lambda: do_connect(
             host, user, pwd, mock.value, dialog, vdom_demo.value, diagcap.value))
         with ui.row().classes("w-full justify-end gap-2"):
