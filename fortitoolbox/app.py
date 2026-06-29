@@ -137,6 +137,10 @@ def identity_strip():
                 .classes("ftb-chip").tooltip(
                     "Toggle if your account has `system-diagnostics enable`") \
                 .style(f"color:{'#3FB950' if d.sysdiag_enabled else '#D29922'}")
+            ui.button("Disconnect", icon="logout", on_click=do_disconnect) \
+                .props("flat dense no-caps").classes("ftb-chip") \
+                .tooltip("Close this session so the next Connect starts clean") \
+                .style("color:#D29922")
         else:
             ui.label("not connected").classes("ftb-chip")
 
@@ -891,6 +895,36 @@ async def do_connect(host, user, pwd, use_mock, dialog, use_vdom_demo=False, for
     except Exception as exc:  # noqa: BLE001
         n.dismiss()
         ui.notify(f"Connection failed: {exc}", type="negative", multi_line=True)
+
+
+def do_disconnect():
+    """Tear down the current device session so the next Connect starts clean.
+
+    Closes the live console (if open) and the engine's SSH channel, then wipes
+    all per-device state. Reconnecting to a *different* box without this left the
+    old channel/results around, which is what made the second device glitch."""
+    if not S.engine and not S.device:
+        ui.notify("Not connected", type="info"); return
+    # close the live console first — it borrows the same credentials/transport
+    if S.console is not None:
+        try:
+            S.console.close()
+        except Exception:  # noqa: BLE001
+            pass
+    if S.engine is not None:
+        try:
+            S.engine.close()
+        except Exception:  # noqa: BLE001
+            pass
+    S.engine = None
+    S.device = None
+    S.results.clear()
+    S.console = None
+    S.console_text = ""
+    S.auth_servers = None
+    S.filter_status = None
+    _refresh_all()
+    ui.notify("Disconnected", type="positive")
 
 
 async def run_ids(ids: List[str], label: str):
